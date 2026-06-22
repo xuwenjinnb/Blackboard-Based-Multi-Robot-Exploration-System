@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1900" viewBox="0 0 1800 1900">
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6aa3cf"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#67a86f"/>
+    </marker>
+    <filter id="shadow" x="-8%" y="-8%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#7f95a5" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <style>
+    .bg { fill: #f7fbfe; }
+    .title { fill: #263f55; font: 700 34px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; }
+    .subtitle { fill: #62798a; font: 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; }
+    .section { fill: #ffffff; stroke: #c9ddea; stroke-width: 1.4; rx: 18; filter: url(#shadow); }
+    .sectionTitle { fill: #4d7088; font: 700 20px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; }
+    .state { fill: #74b352; stroke: #548d3b; stroke-width: 1.3; rx: 12; filter: url(#shadow); }
+    .stateLight { fill: #e8f4df; stroke: #74b352; stroke-width: 1.3; rx: 12; }
+    .system { fill: #6fa8dc; stroke: #3d85c6; stroke-width: 1.3; rx: 12; filter: url(#shadow); }
+    .data { fill: #bde9e3; stroke: #63aaa0; stroke-width: 1.4; rx: 14; filter: url(#shadow); }
+    .role { fill: #d9e2f3; stroke: #8fa4cf; stroke-width: 1.2; rx: 12; }
+    .decision { fill: #f5b183; stroke: #c66a1e; stroke-width: 1.35; filter: url(#shadow); }
+    .error { fill: #f4cccc; stroke: #cc6666; stroke-width: 1.2; rx: 12; }
+    .terminal { fill: #5b9bd5; stroke: #2f75b5; stroke-width: 1.4; }
+    .txtWhite { fill: #ffffff; font: 700 18px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .txtDark { fill: #274e13; font: 700 17px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .txtBlue { fill: #17365d; font: 700 17px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .smallWhite { fill: #ffffff; font: 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .smallDark { fill: #365f2b; font: 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .smallBlue { fill: #355b78; font: 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .dataText { fill: #073763; font: 700 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .label { fill: #426b82; font: 700 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; paint-order: stroke fill; stroke: #f7fbfe; stroke-width: 5px; stroke-linejoin: round; }
+    .arrow { fill: none; stroke: #6aa3cf; stroke-width: 2.2; marker-end: url(#arrowBlue); }
+    .arrowGreen { fill: none; stroke: #67a86f; stroke-width: 2.2; marker-end: url(#arrowGreen); }
+    .dash { stroke-dasharray: 8 7; }
+    .legendText { fill: #4f6678; font: 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; dominant-baseline: middle; }
+  </style>
+
+  <rect class="bg" width="1800" height="1900"/>
+  <text class="title" x="900" y="48">多小车协作巡检仿真系统状态图</text>
+  <text class="subtitle" x="900" y="78">从登录认证、角色分流到 RUNNING 调度闭环，突出 Redis 黑板驱动的低耦合状态迁移</text>
+
+  <g transform="translate(1240,104)">
+    <rect class="state" x="0" y="0" width="34" height="20" rx="6"/>
+    <text class="legendText" x="46" y="10">业务/组件状态</text>
+    <rect class="system" x="160" y="0" width="34" height="20" rx="6"/>
+    <text class="legendText" x="206" y="10">系统运行状态</text>
+    <polygon class="decision" points="333,10 350,0 367,10 350,20"/>
+    <text class="legendText" x="382" y="10">判断条件</text>
+    <rect class="data" x="478" y="0" width="34" height="20" rx="6"/>
+    <text class="legendText" x="524" y="10">Redis 数据</text>
+  </g>
+
+  <rect class="section" x="60" y="115" width="1680" height="500"/>
+  <text class="sectionTitle" x="90" y="148">一、登录认证与角色状态</text>
+  <rect class="section" x="60" y="645" width="1680" height="360"/>
+  <text class="sectionTitle" x="90" y="678">二、系统运行状态</text>
+  <rect class="section" x="60" y="1035" width="1680" height="785"/>
+  <text class="sectionTitle" x="90" y="1068">三、Robot / Controller / Navigator 协作状态闭环</text>
+
+  <!-- Login states -->
+  <circle class="terminal" cx="900" cy="178" r="24"/>
+  <text class="txtWhite" x="900" y="178">始</text>
+
+  <rect class="state" x="760" y="225" width="280" height="74"/>
+  <text class="txtWhite" x="900" y="248">未登录</text>
+  <text class="smallWhite" x="900" y="272">do/显示登录界面</text>
+
+  <rect class="state" x="760" y="342" width="280" height="74"/>
+  <text class="txtWhite" x="900" y="365">认证中</text>
+  <text class="smallWhite" x="900" y="389">do/提交账号密码</text>
+
+  <polygon class="decision" points="900,455 1032,522 900,589 768,522"/>
+  <text class="txtBlue" x="900" y="510">合法用户?</text>
+  <text class="smallBlue" x="900" y="535">读取 auth users</text>
+
+  <rect class="error" x="465" y="486" width="235" height="72"/>
+  <text class="txtBlue" x="582.5" y="510">认证失败</text>
+  <text class="smallBlue" x="582.5" y="535">do/提示错误并返回</text>
+
+  <polygon class="decision" points="900,650 1040,715 900,780 760,715"/>
+  <text class="txtBlue" x="900" y="705">判断用户角色</text>
+  <text class="smallBlue" x="900" y="730">admin / operator / analyst</text>
+
+  <rect class="role" x="165" y="690" width="250" height="76"/>
+  <text class="txtBlue" x="290" y="713">管理员会话</text>
+  <text class="smallBlue" x="290" y="738">do/进入用户管理</text>
+
+  <rect class="role" x="1375" y="690" width="250" height="76"/>
+  <text class="txtBlue" x="1500" y="713">分析员会话</text>
+  <text class="smallBlue" x="1500" y="738">do/查看历史回放</text>
+
+  <rect class="stateLight" x="165" y="805" width="250" height="78"/>
+  <text class="txtDark" x="290" y="826">用户管理中</text>
+  <text class="smallDark" x="290" y="850">新增 / 编辑 / 删除</text>
+  <text class="smallDark" x="290" y="870">写入 auth users</text>
+
+  <rect class="stateLight" x="1375" y="805" width="250" height="78"/>
+  <text class="txtDark" x="1500" y="826">回放分析中</text>
+  <text class="smallDark" x="1500" y="850">读取 replay frames</text>
+  <text class="smallDark" x="1500" y="870">统计覆盖率与事件</text>
+
+  <!-- System states -->
+  <rect class="system" x="760" y="820" width="280" height="74"/>
+  <text class="txtWhite" x="900" y="843">运行员会话</text>
+  <text class="smallWhite" x="900" y="867">do/配置并控制仿真</text>
+
+  <rect class="system" x="125" y="725" width="230" height="76"/>
+  <text class="txtWhite" x="240" y="748">STOPPED 停止</text>
+  <text class="smallWhite" x="240" y="772">do/允许修改配置</text>
+
+  <rect class="system" x="460" y="725" width="230" height="76"/>
+  <text class="txtWhite" x="575" y="748">配置中</text>
+  <text class="smallWhite" x="575" y="772">地图 / 障碍 / 车辆</text>
+
+  <rect class="system" x="790" y="725" width="230" height="76"/>
+  <text class="txtWhite" x="905" y="748">就绪</text>
+  <text class="smallWhite" x="905" y="772">保存 runtime config</text>
+
+  <rect class="system" x="1120" y="725" width="230" height="76"/>
+  <text class="txtWhite" x="1235" y="748">RUNNING 运行</text>
+  <text class="smallWhite" x="1235" y="772">do/tick 调度</text>
+
+  <polygon class="decision" points="1235,830 1365,895 1235,960 1105,895"/>
+  <text class="txtBlue" x="1235" y="884">policy</text>
+  <text class="smallBlue" x="1235" y="909">= low_mdp?</text>
+
+  <rect class="system" x="1450" y="725" width="230" height="76"/>
+  <text class="txtWhite" x="1565" y="748">PAUSED 暂停</text>
+  <text class="smallWhite" x="1565" y="772">保留黑板状态</text>
+
+  <rect class="system" x="1450" y="860" width="230" height="76"/>
+  <text class="txtWhite" x="1565" y="883">RESETTING 重置</text>
+  <text class="smallWhite" x="1565" y="907">清空运行状态</text>
+
+  <rect class="system" x="1450" y="955" width="230" height="76"/>
+  <text class="txtWhite" x="1565" y="978">完成 / 停止</text>
+  <text class="smallWhite" x="1565" y="1002">保存最后快照</text>
+
+  <!-- Collaboration loop states -->
+  <rect class="data" x="720" y="1115" width="360" height="112"/>
+  <text class="dataText" x="900" y="1142">Redis 黑板</text>
+  <text class="smallBlue" x="900" y="1167">map / vehicles / frontiers</text>
+  <text class="smallBlue" x="900" y="1190">tasks / requests / plans</text>
+  <text class="smallBlue" x="900" y="1213">heartbeats / events / replays</text>
+
+  <rect class="state" x="125" y="1130" width="280" height="82"/>
+  <text class="txtWhite" x="265" y="1154">IDLE / SCANNING</text>
+  <text class="smallWhite" x="265" y="1179">do/等待任务并扫描地图</text>
+
+  <rect class="stateLight" x="125" y="1265" width="280" height="82"/>
+  <text class="txtDark" x="265" y="1288">上传 map patch</text>
+  <text class="smallDark" x="265" y="1313">发现并保存 OPEN frontier</text>
+
+  <rect class="state" x="1230" y="1130" width="300" height="82"/>
+  <text class="txtWhite" x="1380" y="1154">Controller BUSY</text>
+  <text class="smallWhite" x="1380" y="1179">读取 frontier 与 IDLE 小车</text>
+
+  <polygon class="decision" points="1380,1260 1518,1328 1380,1396 1242,1328"/>
+  <text class="txtBlue" x="1380" y="1318">有可分配目标?</text>
+  <text class="smallBlue" x="1380" y="1343">nearest / greedy</text>
+
+  <rect class="stateLight" x="1230" y="1440" width="300" height="86"/>
+  <text class="txtDark" x="1380" y="1462">创建 task</text>
+  <text class="smallDark" x="1380" y="1487">frontier ASSIGNED</text>
+  <text class="smallDark" x="1380" y="1508">navigationRequest PENDING</text>
+
+  <rect class="state" x="720" y="1350" width="360" height="86"/>
+  <text class="txtWhite" x="900" y="1372">Navigator PLANNING</text>
+  <text class="smallWhite" x="900" y="1397">领取 PENDING request</text>
+  <text class="smallWhite" x="900" y="1418">baseline / cbs 路径规划</text>
+
+  <polygon class="decision" points="900,1480 1038,1548 900,1616 762,1548"/>
+  <text class="txtBlue" x="900" y="1538">找到路径?</text>
+  <text class="smallBlue" x="900" y="1563">SUCCESS / NO_PATH</text>
+
+  <rect class="stateLight" x="720" y="1660" width="360" height="90"/>
+  <text class="txtDark" x="900" y="1684">写回 navigationPlan</text>
+  <text class="smallDark" x="900" y="1709">成功: task.pathQueue</text>
+  <text class="smallDark" x="900" y="1730">失败: failReason 与事件</text>
+
+  <rect class="state" x="125" y="1455" width="280" height="82"/>
+  <text class="txtWhite" x="265" y="1479">MOVING 移动</text>
+  <text class="smallWhite" x="265" y="1504">do/执行 pathQueue</text>
+
+  <polygon class="decision" points="265,1585 397,1650 265,1715 133,1650"/>
+  <text class="txtBlue" x="265" y="1640">下一步</text>
+  <text class="smallBlue" x="265" y="1665">是否阻塞?</text>
+
+  <rect class="error" x="435" y="1608" width="260" height="84"/>
+  <text class="txtBlue" x="565" y="1631">BLOCKED 阻塞</text>
+  <text class="smallBlue" x="565" y="1656">上报 VEHICLE_BLOCKED</text>
+  <text class="smallBlue" x="565" y="1676">任务回到 PENDING</text>
+
+  <rect class="stateLight" x="125" y="1775" width="280" height="74"/>
+  <text class="txtDark" x="265" y="1798">任务完成</text>
+  <text class="smallDark" x="265" y="1823">task DONE, vehicle IDLE</text>
+
+  <rect class="stateLight" x="445" y="930" width="280" height="82"/>
+  <text class="txtDark" x="585" y="953">low_mdp 决策</text>
+  <text class="smallDark" x="585" y="978">局部价值迭代选下一步</text>
+
+  <polygon class="decision" points="585,1055 715,1120 585,1185 455,1120"/>
+  <text class="txtBlue" x="585" y="1110">探索完成?</text>
+  <text class="smallBlue" x="585" y="1135">无 UNKNOWN 格子</text>
+
+  <rect class="stateLight" x="1120" y="1608" width="270" height="84"/>
+  <text class="txtDark" x="1255" y="1631">状态快照</text>
+  <text class="smallDark" x="1255" y="1656">snapshot / mapDelta</text>
+  <text class="smallDark" x="1255" y="1676">WebSocket 推送前端</text>
+
+  <rect class="state" x="1445" y="1608" width="270" height="84"/>
+  <text class="txtWhite" x="1580" y="1631">实时展示中</text>
+  <text class="smallWhite" x="1580" y="1656">刷新 3D 地图</text>
+  <text class="smallWhite" x="1580" y="1676">车辆 / 任务 / 事件面板</text>
+
+  <!-- Arrows: login -->
+  <path class="arrow" d="M900 202 L900 225"/>
+  <path class="arrow" d="M900 299 L900 342"/>
+  <path class="arrow" d="M900 416 L900 455"/>
+  <path class="arrow" d="M768 522 L700 522"/>
+  <text class="label" x="735" y="508">否</text>
+  <path class="arrow" d="M582 486 C582 255 760 255 760 255"/>
+  <path class="arrow" d="M900 589 L900 650"/>
+  <text class="label" x="918" y="622">是</text>
+  <path class="arrow" d="M760 715 L415 728"/>
+  <text class="label" x="555" y="696">超级管理员</text>
+  <path class="arrow" d="M1040 715 L1375 728"/>
+  <text class="label" x="1255" y="696">分析员</text>
+  <path class="arrow" d="M900 780 L900 820"/>
+  <text class="label" x="945" y="807">系统运行员</text>
+  <path class="arrowGreen dash" d="M290 766 L290 805"/>
+  <path class="arrowGreen dash" d="M1500 766 L1500 805"/>
+
+  <!-- Arrows: system -->
+  <path class="arrow" d="M900 894 C900 935 240 650 240 725"/>
+  <path class="arrow" d="M355 763 L460 763"/>
+  <path class="arrow" d="M690 763 L790 763"/>
+  <path class="arrow" d="M1020 763 L1120 763"/>
+  <path class="arrow" d="M1235 801 L1235 830"/>
+  <path class="arrow" d="M1350 763 L1450 763"/>
+  <text class="label" x="1410" y="746">暂停</text>
+  <path class="arrow" d="M1565 801 L1565 860"/>
+  <text class="label" x="1600" y="834">重置</text>
+  <path class="arrow" d="M1565 936 L1565 955"/>
+  <path class="arrow" d="M1450 993 C1390 993 1390 763 1350 763"/>
+  <text class="label" x="1395" y="928">停止后回到 STOPPED</text>
+  <path class="arrow" d="M1105 895 L725 970"/>
+  <text class="label" x="920" y="922">是</text>
+  <path class="arrow" d="M1235 960 L1235 1046 L265 1046 L265 1130"/>
+  <text class="label" x="1290" y="988">否</text>
+
+  <!-- low_mdp branch -->
+  <path class="arrowGreen" d="M585 1012 L585 1055"/>
+  <path class="arrowGreen" d="M585 1185 C585 1250 405 1250 405 1306"/>
+  <path class="arrowGreen" d="M455 1120 C395 1120 405 929 1120 763"/>
+  <text class="label" x="440" y="1100">否，继续 tick</text>
+  <path class="arrowGreen" d="M715 1120 C815 1120 1240 1050 1450 763"/>
+  <text class="label" x="780" y="1096">是，暂停</text>
+
+  <!-- Collaboration loop arrows -->
+  <path class="arrowGreen" d="M405 1171 L720 1171"/>
+  <text class="label" x="560" y="1152">读取/写入状态</text>
+  <path class="arrowGreen" d="M265 1212 L265 1265"/>
+  <path class="arrowGreen" d="M405 1306 L720 1178"/>
+  <text class="label" x="535" y="1272">map patch / frontier</text>
+  <path class="arrowGreen" d="M1080 1171 L1230 1171"/>
+  <text class="label" x="1155" y="1150">OPEN frontier</text>
+  <path class="arrowGreen" d="M1380 1212 L1380 1260"/>
+  <path class="arrowGreen" d="M1380 1396 L1380 1440"/>
+  <text class="label" x="1412" y="1418">是</text>
+  <path class="arrowGreen" d="M1242 1328 L1080 1202"/>
+  <text class="label" x="1190" y="1296">否，等待</text>
+  <path class="arrowGreen" d="M1230 1483 L1080 1210"/>
+  <text class="label" x="1148" y="1426">task / request</text>
+  <path class="arrowGreen" d="M900 1227 L900 1350"/>
+  <text class="label" x="940" y="1290">领取请求</text>
+  <path class="arrowGreen" d="M900 1436 L900 1480"/>
+  <path class="arrowGreen" d="M900 1616 L900 1660"/>
+  <text class="label" x="940" y="1640">写回结果</text>
+  <path class="arrowGreen" d="M720 1698 C570 1698 520 1496 405 1496"/>
+  <text class="label" x="545" y="1608">pathQueue</text>
+  <path class="arrowGreen" d="M265 1537 L265 1585"/>
+  <path class="arrowGreen" d="M397 1650 L435 1650"/>
+  <text class="label" x="418" y="1634">是</text>
+  <path class="arrowGreen" d="M565 1608 C565 1508 720 1260 720 1205"/>
+  <text class="label" x="655" y="1455">重规划</text>
+  <path class="arrowGreen" d="M265 1715 L265 1775"/>
+  <text class="label" x="298" y="1745">否且路径走完</text>
+  <path class="arrowGreen dash" d="M405 1812 C615 1840 710 1768 720 1706"/>
+  <path class="arrowGreen dash" d="M1080 1705 L1120 1650"/>
+  <path class="arrowGreen dash" d="M1390 1650 L1445 1650"/>
+  <text class="label" x="1430" y="1585">WebSocket</text>
+  <path class="arrowGreen dash" d="M1445 1608 C1240 1510 1115 1265 1080 1210"/>
+  <text class="label" x="1290" y="1482">控制命令/快照回流</text>
+
+  <rect x="90" y="1848" width="1620" height="34" rx="10" fill="#eef7fc" stroke="#c6ddea"/>
+  <text class="subtitle" x="900" y="1870">核心特点：Robot、Controller、Navigator 不直接互调，通过 Redis 黑板交换 map、frontier、task、request、plan、heartbeat 与 event 状态。</text>
+</svg>

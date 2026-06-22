@@ -1,0 +1,39 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Node/Vue dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+.npm/
+.yarn/
+*.tsbuildinfo
+.edge-path-cache/
+.edge-path-check/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Generated archives
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# Logs and OS/editor files
+*.log
+.DS_Store
+Thumbs.db

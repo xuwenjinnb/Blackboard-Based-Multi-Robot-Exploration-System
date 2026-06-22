@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#222"/>
+    </marker>
+    <style>
+      .entity{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .process{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .flow{fill:none;stroke:#222;stroke-width:2;marker-end:url(#arrow)}
+      .storeLine{stroke:#222;stroke-width:1.7}
+      .title{font:700 26px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .txt{font:18px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .label{font:15px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+    </style>
+  </defs>
+  <rect width="1200" height="820" fill="#fff"/>
+  <text x="45" y="50" class="title">1.用户管理子系统二层数据流图</text>
+
+  <rect x="70" y="115" width="85" height="160" class="entity"/>
+  <text x="112" y="185" text-anchor="middle" class="txt"><tspan x="112" dy="0">用</tspan><tspan x="112" dy="28">户</tspan></text>
+
+  <rect x="70" y="555" width="95" height="170" class="entity"/>
+  <text x="118" y="625" text-anchor="middle" class="txt"><tspan x="118" dy="0">超级管</tspan><tspan x="118" dy="28">理员</tspan></text>
+
+  <circle cx="420" cy="170" r="76" class="process"/>
+  <text x="420" y="158" text-anchor="middle" class="txt"><tspan x="420" dy="0">1.1</tspan><tspan x="420" dy="28">登录</tspan></text>
+
+  <circle cx="420" cy="385" r="76" class="process"/>
+  <text x="420" y="373" text-anchor="middle" class="txt"><tspan x="420" dy="0">1.2</tspan><tspan x="420" dy="28">角色分流</tspan></text>
+
+  <circle cx="420" cy="645" r="76" class="process"/>
+  <text x="420" y="633" text-anchor="middle" class="txt"><tspan x="420" dy="0">1.3</tspan><tspan x="420" dy="28">用户管理</tspan></text>
+
+  <g>
+    <line x1="690" y1="220" x2="940" y2="220" class="storeLine"/>
+    <line x1="690" y1="270" x2="940" y2="270" class="storeLine"/>
+    <text x="815" y="252" text-anchor="middle" class="txt">用户信息表</text>
+  </g>
+  <g>
+    <line x1="690" y1="405" x2="940" y2="405" class="storeLine"/>
+    <line x1="690" y1="455" x2="940" y2="455" class="storeLine"/>
+    <text x="815" y="437" text-anchor="middle" class="txt">登录会话表</text>
+  </g>
+
+  <path d="M155 160 L345 160" class="flow"/>
+  <text x="230" y="145" class="label">登录信息</text>
+  <path d="M155 210 L355 360" class="flow"/>
+  <text x="235" y="295" class="label">token / 请求路径</text>
+
+  <path d="M488 180 C570 190 620 220 690 245" class="flow"/>
+  <text x="535" y="200" class="label">查询用户</text>
+  <path d="M690 270 C605 315 520 352 490 370" class="flow"/>
+  <text x="590" y="335" class="label">用户记录</text>
+
+  <path d="M490 405 C570 420 620 430 690 430" class="flow"/>
+  <text x="545" y="450" class="label">写入 token</text>
+  <path d="M690 455 C585 515 505 575 455 585" class="flow"/>
+  <text x="595" y="555" class="label">会话信息</text>
+
+  <path d="M165 640 L345 642" class="flow"/>
+  <text x="210" y="625" class="label">用户信息</text>
+  <path d="M495 645 C595 610 655 500 735 270" class="flow"/>
+  <text x="600" y="615" class="label">增删改查</text>
+  <path d="M690 220 C615 160 560 145 496 150" class="flow"/>
+  <text x="560" y="135" class="label">登录结果 / 角色</text>
+</svg>

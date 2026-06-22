@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="850" viewBox="0 0 1260 850">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#222"/>
+    </marker>
+    <style>
+      .entity{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .process{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .flow{fill:none;stroke:#222;stroke-width:2;marker-end:url(#arrow)}
+      .storeLine{stroke:#222;stroke-width:1.7}
+      .title{font:700 26px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .txt{font:18px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .label{font:15px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+    </style>
+  </defs>
+  <rect width="1260" height="850" fill="#fff"/>
+  <text x="45" y="50" class="title">2.实验配置子系统二层数据流图</text>
+
+  <rect x="70" y="340" width="110" height="170" class="entity"/>
+  <text x="125" y="414" text-anchor="middle" class="txt"><tspan x="125" dy="0">配置</tspan><tspan x="125" dy="28">员</tspan></text>
+
+  <circle cx="390" cy="145" r="74" class="process"/>
+  <text x="390" y="132" text-anchor="middle" class="txt"><tspan x="390" dy="0">2.1</tspan><tspan x="390" dy="28">地图配置</tspan></text>
+
+  <circle cx="390" cy="335" r="74" class="process"/>
+  <text x="390" y="322" text-anchor="middle" class="txt"><tspan x="390" dy="0">2.2</tspan><tspan x="390" dy="28">障碍配置</tspan></text>
+
+  <circle cx="390" cy="525" r="74" class="process"/>
+  <text x="390" y="512" text-anchor="middle" class="txt"><tspan x="390" dy="0">2.3</tspan><tspan x="390" dy="28">小车配置</tspan></text>
+
+  <circle cx="390" cy="715" r="74" class="process"/>
+  <text x="390" y="702" text-anchor="middle" class="txt"><tspan x="390" dy="0">2.4</tspan><tspan x="390" dy="28">算法配置</tspan></text>
+
+  <circle cx="735" cy="430" r="78" class="process"/>
+  <text x="735" y="416" text-anchor="middle" class="txt"><tspan x="735" dy="0">2.5</tspan><tspan x="735" dy="28">初始化运行态</tspan></text>
+
+  <g>
+    <line x1="820" y1="150" x2="1080" y2="150" class="storeLine"/>
+    <line x1="820" y1="200" x2="1080" y2="200" class="storeLine"/>
+    <text x="950" y="182" text-anchor="middle" class="txt">地图障碍表</text>
+  </g>
+  <g>
+    <line x1="820" y1="370" x2="1080" y2="370" class="storeLine"/>
+    <line x1="820" y1="420" x2="1080" y2="420" class="storeLine"/>
+    <text x="950" y="402" text-anchor="middle" class="txt">小车信息表</text>
+  </g>
+  <g>
+    <line x1="820" y1="595" x2="1080" y2="595" class="storeLine"/>
+    <line x1="820" y1="645" x2="1080" y2="645" class="storeLine"/>
+    <text x="950" y="627" text-anchor="middle" class="txt">运行配置表</text>
+  </g>
+
+  <path d="M180 390 C240 260 300 170 318 152" class="flow"/>
+  <text x="210" y="250" class="label">地图大小</text>
+  <path d="M180 415 L318 345" class="flow"/>
+  <text x="212" y="375" class="label">障碍布局</text>
+  <path d="M180 440 L318 515" class="flow"/>
+  <text x="214" y="492" class="label">小车数量</text>
+  <path d="M180 465 C250 590 300 690 318 710" class="flow"/>
+  <text x="214" y="618" class="label">策略和算法</text>
+
+  <path d="M462 145 L820 175" class="flow"/>
+  <path d="M462 335 C570 265 700 205 820 175" class="flow"/>
+  <path d="M462 525 C590 490 700 425 820 395" class="flow"/>
+  <path d="M462 715 L820 620" class="flow"/>
+
+  <path d="M462 145 C540 225 615 335 664 410" class="flow"/>
+  <path d="M462 335 C540 375 600 405 657 425" class="flow"/>
+  <path d="M462 525 C555 500 610 470 658 450" class="flow"/>
+  <path d="M462 715 C560 615 620 535 680 480" class="flow"/>
+
+  <path d="M812 430 L820 395" class="flow"/>
+  <path d="M795 470 C870 520 900 565 930 595" class="flow"/>
+  <path d="M820 175 C730 255 725 350 735 352" class="flow"/>
+  <text x="640" y="300" class="label">配置结果</text>
+</svg>
