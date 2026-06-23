@@ -91,6 +91,9 @@ class Blackboard:
             for x in range(self.width)
         ]
 
+    def _point_in_bounds(self, point: tuple[int, int]) -> bool:
+        return 0 <= point[0] < self.width and 0 <= point[1] < self.height
+
     def _build_map(
         self,
         cells: list[dict[str, Any]],
@@ -970,6 +973,8 @@ class Blackboard:
         with self.lock:
             x = int(frontier["position"]["x"])
             y = int(frontier["position"]["y"])
+            if not self._point_in_bounds((x, y)):
+                raise ValueError(f"frontier position ({x}, {y}) is outside the map")
             for existing in self.frontiers.values():
                 if existing["position"] == {"x": x, "y": y} and existing["status"] in {"OPEN", "ASSIGNED"}:
                     incoming_gain = int(frontier.get("unknownGain") or 0)
@@ -1002,9 +1007,15 @@ class Blackboard:
                 continue
             position = frontier.get("position", {})
             point = (int(position.get("x", 0)), int(position.get("y", 0)))
+            if not self._point_in_bounds(point):
+                frontier["status"] = "CLOSED"
+                frontier["unknownGain"] = 0
+                frontier["updatedAt"] = now_ms()
+                closed += 1
+                continue
             cell_state = cell_map.get(point, {}).get("state", "UNKNOWN")
             has_unknown_neighbor = self._has_unknown_neighbor(point, cell_map)
-            if cell_state == "VISITED" or not has_unknown_neighbor:
+            if cell_state not in {"FREE", "VISITED"} or not has_unknown_neighbor:
                 frontier["status"] = "VISITED" if cell_state == "VISITED" else "CLOSED"
                 frontier["unknownGain"] = 0
                 frontier["updatedAt"] = now_ms()
@@ -1227,7 +1238,17 @@ class Blackboard:
         }
 
     def open_frontiers(self) -> list[dict[str, Any]]:
-        return [copy.deepcopy(item) for item in self.frontiers.values() if item["status"] == "OPEN"]
+        return [
+            copy.deepcopy(item)
+            for item in self.frontiers.values()
+            if item["status"] == "OPEN"
+            and self._point_in_bounds(
+                (
+                    int(item.get("position", {}).get("x", -1)),
+                    int(item.get("position", {}).get("y", -1)),
+                )
+            )
+        ]
 
     def idle_vehicles(self) -> list[dict[str, Any]]:
         active = self.active_task_vehicle_ids()

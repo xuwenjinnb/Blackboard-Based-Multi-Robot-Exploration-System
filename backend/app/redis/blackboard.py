@@ -78,6 +78,34 @@ class RedisBlackboard(Blackboard):
         frontier.pop("score", None)
         return frontier
 
+    @staticmethod
+    def _frontier_in_bounds(frontier: dict[str, Any], width: int, height: int) -> bool:
+        position = frontier.get("position") or {}
+        try:
+            x = int(position["x"])
+            y = int(position["y"])
+        except (KeyError, TypeError, ValueError):
+            return False
+        return 0 <= x < width and 0 <= y < height
+
+    def _sanitize_frontier_for_map(
+        self,
+        frontier: dict[str, Any],
+        *,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> dict[str, Any]:
+        sanitized = self._sanitize_frontier(frontier)
+        map_width = self.width if width is None else int(width)
+        map_height = self.height if height is None else int(height)
+        if (
+            sanitized.get("status") in {"OPEN", "ASSIGNED"}
+            and not self._frontier_in_bounds(sanitized, map_width, map_height)
+        ):
+            sanitized["status"] = "CLOSED"
+            sanitized["unknownGain"] = 0
+        return sanitized
+
     @property
     def _sync_depth(self) -> int:
         return getattr(self._local, "sync_depth", 0)
@@ -162,6 +190,7 @@ class RedisBlackboard(Blackboard):
         if not meta:
             self._sync_depth += 1
             try:
+                self._prime_persisted_state_for_reset()
                 self._replace_events = True
                 Blackboard.reset(self)
                 self._persist_state()
@@ -222,8 +251,15 @@ class RedisBlackboard(Blackboard):
                     int(chunk.get("origin", {}).get("x", 0)),
                 )
             )
+            previous_dimensions = (self.width, self.height, self.chunk_size)
+            self.width = width
+            self.height = height
+            self.chunk_size = chunk_size
             if chunks:
-                cells = self._cells_from_chunks(chunks)
+                try:
+                    cells = self._cells_from_chunks(chunks)
+                finally:
+                    self.width, self.height, self.chunk_size = previous_dimensions
             else:
                 stored_cells = {
                     field: value
@@ -231,15 +267,22 @@ class RedisBlackboard(Blackboard):
                     if field != "__empty__"
                 }
                 self._persisted_hashes["map:cells"] = stored_cells
-                cells = [self._decode(value, {}) for value in stored_cells.values()]
-                cells.sort(key=lambda cell: (int(cell["y"]), int(cell["x"])))
-                if not cells:
-                    previous = (self.width, self.height)
-                    self.width, self.height = width, height
-                    try:
+                try:
+                    cells = [
+                        self._decode(value, {})
+                        for value in stored_cells.values()
+                    ]
+                    cells = [
+                        cell
+                        for cell in cells
+                        if 0 <= int(cell.get("x", -1)) < self.width
+                        and 0 <= int(cell.get("y", -1)) < self.height
+                    ]
+                    cells.sort(key=lambda cell: (int(cell["y"]), int(cell["x"])))
+                    if not cells:
                         cells = self._build_empty_cells(int(meta.get("updatedAt", now_ms())))
-                    finally:
-                        self.width, self.height = previous
+                finally:
+                    self.width, self.height, self.chunk_size = previous_dimensions
                 chunks = []
 
             self.width = width
@@ -287,7 +330,7 @@ class RedisBlackboard(Blackboard):
             }
             if attribute == "frontiers":
                 decoded = {
-                    field: self._sanitize_frontier(frontier)
+                    field: self._sanitize_frontier_for_map(frontier)
                     for field, frontier in decoded.items()
                 }
             setattr(
@@ -487,6 +530,7 @@ class RedisBlackboard(Blackboard):
         with self._redis_guard():
             self._sync_depth += 1
             try:
+                self._prime_persisted_state_for_reset()
                 self._replace_events = True
                 self._persisted_event_ids = set()
                 self._persisted_map_deltas = []
@@ -496,6 +540,30 @@ class RedisBlackboard(Blackboard):
                 self._persist_state()
             finally:
                 self._sync_depth -= 1
+
+    def _prime_persisted_state_for_reset(self) -> None:
+        hash_names = [
+            "map:chunks",
+            "map:cells",
+            *self.COLLECTIONS.values(),
+        ]
+        with self.redis.pipeline(transaction=False) as pipe:
+            for name in hash_names:
+                pipe.hgetall(self.key(name))
+            pipe.smembers(self.key("true_obstacles"))
+            raw_results = pipe.execute()
+
+        for name, raw_hash in zip(hash_names, raw_results[: len(hash_names)]):
+            self._persisted_hashes[name] = {
+                field: value
+                for field, value in raw_hash.items()
+                if field != "__empty__"
+            }
+        raw_obstacles = raw_results[len(hash_names)]
+        self._persisted_obstacles = {
+            tuple(map(int, value.split(":")))
+            for value in raw_obstacles
+        }
 
     def next_id(self, prefix: str) -> str:
         return self._execute(Blackboard.next_id, prefix, write=True)
@@ -577,7 +645,14 @@ class RedisBlackboard(Blackboard):
                 if field != "__empty__"
             ]
             if name == "frontiers":
-                items = [self._sanitize_frontier(frontier) for frontier in items]
+                items = [
+                    self._sanitize_frontier_for_map(
+                        frontier,
+                        width=current_width,
+                        height=current_height,
+                    )
+                    for frontier in items
+                ]
             collections[name] = items
 
         return {
@@ -667,7 +742,14 @@ class RedisBlackboard(Blackboard):
                 if field != "__empty__"
             ]
             if name == "frontiers":
-                items = [self._sanitize_frontier(frontier) for frontier in items]
+                items = [
+                    self._sanitize_frontier_for_map(
+                        frontier,
+                        width=current_width,
+                        height=current_height,
+                    )
+                    for frontier in items
+                ]
             collections[name] = items
 
         snapshot = {

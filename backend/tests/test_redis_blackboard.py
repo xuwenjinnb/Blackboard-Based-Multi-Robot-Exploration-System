@@ -121,6 +121,82 @@ def test_redis_blackboard_survives_new_instance(redis_blackboard):
     assert snapshot["map"]["chunks"]
 
 
+def test_reset_on_start_removes_stale_runtime_hash_fields(redis_blackboard):
+    blackboard = redis_blackboard
+    vehicle = blackboard.register_vehicle(
+        "car-01",
+        {"position": {"x": 1, "y": 1}, "heading": 0},
+    )
+    frontier = blackboard.save_frontier(
+        {
+            "position": {"x": 2, "y": 1},
+            "unknownGain": 3,
+            "discoveredBy": vehicle["vehicleId"],
+        }
+    )
+    task = blackboard.create_task_for_frontier(vehicle["vehicleId"], frontier)
+    request = blackboard.create_navigation_request(task)
+    blackboard.write_navigation_plan(
+        {
+            "requestId": request["requestId"],
+            "taskId": task["taskId"],
+            "vehicleId": vehicle["vehicleId"],
+            "createdBy": "navigator-01",
+            "status": "SUCCESS",
+            "path": [],
+        }
+    )
+
+    restored = RedisBlackboard(
+        REDIS_URL,
+        prefix=blackboard.prefix,
+        width=8,
+        height=6,
+        reset_on_start=True,
+    )
+    snapshot = restored.snapshot()
+
+    assert snapshot["vehicles"] == []
+    assert snapshot["frontiers"] == []
+    assert snapshot["tasks"] == []
+    assert snapshot["navigationRequests"] == []
+    assert snapshot["navigationPlans"] == []
+    for redis_name in RedisBlackboard.COLLECTIONS.values():
+        fields = restored.redis.hgetall(restored.key(redis_name))
+        assert set(fields) <= {"__empty__"}
+
+
+def test_snapshot_closes_stale_out_of_bounds_frontier(redis_blackboard):
+    blackboard = redis_blackboard
+    blackboard.redis.hset(
+        blackboard.key("frontiers"),
+        "frontier-stale",
+        RedisBlackboard._encode(
+            {
+                "frontierId": "frontier-stale",
+                "position": {"x": 9, "y": 2},
+                "unknownGain": 5,
+                "discoveredBy": "car-01",
+                "status": "OPEN",
+                "timestamp": 1,
+            }
+        ),
+    )
+
+    restored = RedisBlackboard(
+        REDIS_URL,
+        prefix=blackboard.prefix,
+        width=8,
+        height=6,
+    )
+    snapshot = restored.snapshot()
+
+    assert snapshot["frontiers"][0]["frontierId"] == "frontier-stale"
+    assert snapshot["frontiers"][0]["status"] == "CLOSED"
+    assert snapshot["frontiers"][0]["unknownGain"] == 0
+    assert restored.open_frontiers() == []
+
+
 def test_redis_blackboard_repairs_incomplete_persisted_chunks(redis_blackboard):
     blackboard = redis_blackboard
     chunk = copy.deepcopy(blackboard.snapshot()["map"]["chunks"][0])
@@ -150,6 +226,46 @@ def test_redis_blackboard_repairs_incomplete_persisted_chunks(redis_blackboard):
     assert len(snapshot["map"]["cells"]) == 48
     assert len(snapshot["map"]["chunks"][0]["cells"]) == 48
     assert cell_map[(0, 0)]["state"] == "UNKNOWN"
+
+
+def test_load_state_filters_cells_outside_current_map(redis_blackboard):
+    blackboard = redis_blackboard
+    meta = blackboard.redis.hgetall(blackboard.key("map:meta"))
+    meta.update({"width": "8", "height": "6", "chunkSize": "4"})
+    blackboard.redis.hset(blackboard.key("map:meta"), mapping=meta)
+
+    chunk = copy.deepcopy(blackboard.snapshot()["map"]["chunks"][0])
+    chunk["cells"].append(
+        {
+            "x": 8,
+            "y": 2,
+            "state": "FREE",
+            "confidence": 1.0,
+            "updatedBy": "stale-worker",
+            "updatedAt": 1,
+        }
+    )
+    blackboard.redis.hset(
+        blackboard.key("map:chunks"),
+        chunk["chunkId"],
+        RedisBlackboard._encode(chunk),
+    )
+
+    restored = RedisBlackboard(
+        REDIS_URL,
+        prefix=blackboard.prefix,
+        width=50,
+        height=50,
+    )
+    with restored.batch():
+        snapshot = restored.snapshot_view()
+
+    assert snapshot["map"]["width"] == 8
+    assert snapshot["map"]["height"] == 6
+    assert all(
+        0 <= int(cell["x"]) < 8 and 0 <= int(cell["y"]) < 6
+        for cell in snapshot["map"]["cells"]
+    )
 
 
 def test_navigation_request_claim_is_exclusive(redis_blackboard):

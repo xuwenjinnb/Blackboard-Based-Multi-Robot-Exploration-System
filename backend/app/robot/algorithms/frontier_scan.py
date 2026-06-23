@@ -74,10 +74,14 @@ class FrontierScanAlgorithm:
 
     def detect_frontiers(self, vehicle_id: str, center: dict[str, int], radius: int) -> None:
         snapshot = self.blackboard.snapshot_view()
+        width = int(snapshot["map"].get("width", self.blackboard.width))
+        height = int(snapshot["map"].get("height", self.blackboard.height))
         cell_map = {(cell["x"], cell["y"]): cell for cell in snapshot["map"]["cells"]}
         candidates: list[tuple[float, int, int, int]] = []
         for y in range(center["y"] - radius, center["y"] + radius + 1):
             for x in range(center["x"] - radius, center["x"] + radius + 1):
+                if not (0 <= x < width and 0 <= y < height):
+                    continue
                 cell = cell_map.get((x, y))
                 if not cell or cell.get("state") not in {"FREE", "VISITED"}:
                     continue
@@ -94,15 +98,18 @@ class FrontierScanAlgorithm:
 
         candidates.sort(key=lambda item: (item[0], item[1]), reverse=True)
         for _rank_score, unknown_gain, x, y in candidates[:MAX_FRONTIERS_PER_SCAN]:
-            self.blackboard.save_frontier(
-                {
-                    "position": {"x": x, "y": y},
-                    "unknownGain": unknown_gain,
-                    "discoveredBy": vehicle_id,
-                    "status": "OPEN",
-                    "timestamp": now_ms(),
-                }
-            )
+            try:
+                self.blackboard.save_frontier(
+                    {
+                        "position": {"x": x, "y": y},
+                        "unknownGain": unknown_gain,
+                        "discoveredBy": vehicle_id,
+                        "status": "OPEN",
+                        "timestamp": now_ms(),
+                    }
+                )
+            except ValueError:
+                continue
 
     def unknown_cells_visible_from(
         self,

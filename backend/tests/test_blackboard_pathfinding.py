@@ -336,6 +336,45 @@ def test_frontier_is_saved_and_deduplicated():
     assert len(board.snapshot()["frontiers"]) == 1
 
 
+def test_frontier_outside_map_is_rejected():
+    board = Blackboard(width=8, height=6)
+
+    with pytest.raises(ValueError, match="outside the map"):
+        board.save_frontier(
+            {
+                "position": {"x": 8, "y": 3},
+                "unknownGain": 1,
+                "discoveredBy": "car-test",
+            }
+        )
+
+
+def test_unchanged_map_patch_does_not_rewrite_frontier_state():
+    board = Blackboard(width=8, height=6)
+    board.register_vehicle("car-test", {"position": {"x": 2, "y": 2}, "heading": 0})
+    board.frontiers["frontier-stale"] = {
+        "frontierId": "frontier-stale",
+        "position": {"x": 8, "y": 2},
+        "unknownGain": 5,
+        "discoveredBy": "car-test",
+        "status": "OPEN",
+        "timestamp": now_ms(),
+    }
+    before = board.snapshot()["map"]["version"]
+
+    result = board.upload_map_patch(
+        {
+            "vehicleId": "car-test",
+            "cells": [],
+        }
+    )
+
+    assert result["changed"] == 0
+    assert board.snapshot()["map"]["version"] == before
+    assert board.frontiers["frontier-stale"]["status"] == "OPEN"
+    assert board.open_frontiers() == []
+
+
 def test_astar_returns_path_around_obstacle():
     cells = []
     for y in range(5):
