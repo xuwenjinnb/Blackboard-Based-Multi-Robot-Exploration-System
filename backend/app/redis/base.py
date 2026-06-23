@@ -175,11 +175,26 @@ class Blackboard:
         return chunks
 
     def _cells_from_chunks(self, chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        cells = [
-            cell
+        if not chunks:
+            return []
+        timestamp = max(
+            (
+                int(cell.get("updatedAt", 0))
+                for chunk in chunks
+                for cell in chunk.get("cells", [])
+            ),
+            default=now_ms(),
+        )
+        by_point = {
+            (int(cell["x"]), int(cell["y"])): copy.deepcopy(cell)
             for chunk in chunks
             for cell in chunk.get("cells", [])
-        ]
+            if 0 <= int(cell.get("x", -1)) < self.width
+            and 0 <= int(cell.get("y", -1)) < self.height
+        }
+        for cell in self._build_empty_cells(timestamp or now_ms()):
+            by_point.setdefault((int(cell["x"]), int(cell["y"])), cell)
+        cells = list(by_point.values())
         cells.sort(key=lambda cell: (int(cell["y"]), int(cell["x"])))
         return cells
 

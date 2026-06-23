@@ -254,7 +254,7 @@ class RedisBlackboard(Blackboard):
                 "version": map_signature[1],
                 "generation": generation,
                 "cells": cells,
-                "chunks": chunks or self._build_chunks_from_cells(cells),
+                "chunks": self._build_chunks_from_cells(cells),
                 "updatedAt": int(meta.get("updatedAt", 0)),
             }
             if raw_obstacles or obstacles_initialized:
@@ -563,7 +563,7 @@ class RedisBlackboard(Blackboard):
                 "version": int(meta.get("version", 1)),
                 "generation": int(meta.get("generation", updated_at)),
                 "cells": cells,
-                "chunks": chunks or self._build_chunks_from_cells(cells),
+                "chunks": self._build_chunks_from_cells(cells),
                 "updatedAt": updated_at,
             }
         finally:

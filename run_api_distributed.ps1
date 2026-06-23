@@ -10,9 +10,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location $ScriptDir
+$BackendDir = Join-Path $ScriptDir "backend"
+Set-Location $BackendDir
 
-$VenvPython = Join-Path $ScriptDir ".venv\Scripts\python.exe"
+$VenvPython = Join-Path $BackendDir ".venv\Scripts\python.exe"
 
 function Test-VenvPython {
     if (-not (Test-Path -LiteralPath $VenvPython)) {
