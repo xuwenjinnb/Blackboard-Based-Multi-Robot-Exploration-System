@@ -5,7 +5,8 @@ from heapq import heappop, heappush
 from typing import Any
 
 from ...config import SimulationConfig
-from ...pathfinding import point_key, st_astar
+from ...pathfinding import point_key
+from .st_astar_planner import st_astar
 
 
 class CBSPlanner:

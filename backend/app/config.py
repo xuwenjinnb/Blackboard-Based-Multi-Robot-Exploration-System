@@ -5,23 +5,6 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class RewardConfig:
-    scan_radius: int = 2
-    interaction_radius: int = 2
-    new_cell_weight: float = 10.0
-    repeated_cell_weight: float = 0.05
-    repeat_mode: str = "team_overlap"
-    reward_scale: float = 0.1
-    reward_clip: float | None = 1.0
-    interaction_weight: float = 0.1
-    complete_bonus: float = 100.0
-    step_penalty: float = -1.0
-    interaction_soft_start: int = 2
-    interaction_hard_limit: int = 7
-    interaction_hard_penalty: float = -15.0
-
-
-@dataclass(frozen=True)
 class SimulationConfig:
     policy: str = "nearest"
     navigator_algorithm: str = "baseline"
@@ -37,34 +20,6 @@ class SimulationConfig:
     low_level_mdp_repulsion_weight: float = 8.0
     low_level_mdp_move_cost: float = 0.2
     num_vehicles: int = 8
-
-
-@dataclass(frozen=True)
-class TrainingConfig:
-    policy: str = "nearest"
-    max_steps: int = 500
-    gamma: float = 0.99
-    batch_size: int = 16
-    episodes: int = 250_000
-    parallel_envs: int = 2
-    obstacle_density_min: float = 0.10
-    obstacle_density_max: float = 0.25
-    num_vehicles: int = 8
-    candidate_count: int = 4
-    map_width: int = 50
-    map_height: int = 50
-    scan_radius: int = 2
-    lstm_hidden: int = 64
-
-
-@dataclass(frozen=True)
-class RedisConfig:
-    url: str = "redis://127.0.0.1:6379/0"
-    prefix: str = "inspection"
-    reset_on_start: bool = False
-    map_width: int = 50
-    map_height: int = 50
-    map_chunk_size: int = 10
 
 
 def simulation_config_from_env() -> SimulationConfig:
@@ -83,18 +38,6 @@ def simulation_config_from_env() -> SimulationConfig:
         low_level_mdp_repulsion_weight=_env_float("INSPECTION_LOW_LEVEL_MDP_REPULSION_WEIGHT", 8.0),
         low_level_mdp_move_cost=_env_float("INSPECTION_LOW_LEVEL_MDP_MOVE_COST", 0.2),
     )
-
-
-def redis_config_from_env() -> RedisConfig:
-    return RedisConfig(
-        url=os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0"),
-        prefix=os.getenv("REDIS_PREFIX", "inspection"),
-        reset_on_start=_env_bool("REDIS_RESET_ON_START", False),
-        map_width=_env_int("INSPECTION_MAP_WIDTH", 50),
-        map_height=_env_int("INSPECTION_MAP_HEIGHT", 50),
-        map_chunk_size=_env_int("INSPECTION_MAP_CHUNK_SIZE", 10),
-    )
-
 
 def _env_int(name: str, default: int) -> int:
     value = os.getenv(name)

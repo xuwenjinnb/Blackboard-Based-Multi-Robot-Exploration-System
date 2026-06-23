@@ -5,23 +5,6 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class RewardConfig:
-    scan_radius: int = 2
-    interaction_radius: int = 2
-    new_cell_weight: float = 10.0
-    repeated_cell_weight: float = 0.05
-    repeat_mode: str = "team_overlap"
-    reward_scale: float = 0.1
-    reward_clip: float | None = 1.0
-    interaction_weight: float = 0.1
-    complete_bonus: float = 100.0
-    step_penalty: float = -1.0
-    interaction_soft_start: int = 2
-    interaction_hard_limit: int = 7
-    interaction_hard_penalty: float = -15.0
-
-
-@dataclass(frozen=True)
 class SimulationConfig:
     policy: str = "nearest"
     navigator_algorithm: str = "baseline"
@@ -36,24 +19,6 @@ class SimulationConfig:
     low_level_mdp_iterations: int = 50
     low_level_mdp_repulsion_weight: float = 8.0
     low_level_mdp_move_cost: float = 0.2
-
-
-@dataclass(frozen=True)
-class TrainingConfig:
-    policy: str = "nearest"
-    max_steps: int = 500
-    gamma: float = 0.99
-    batch_size: int = 16
-    episodes: int = 250_000
-    parallel_envs: int = 2
-    obstacle_density_min: float = 0.10
-    obstacle_density_max: float = 0.25
-    num_vehicles: int = 3
-    candidate_count: int = 4
-    map_width: int = 32
-    map_height: int = 24
-    scan_radius: int = 2
-    lstm_hidden: int = 64
 
 
 @dataclass(frozen=True)

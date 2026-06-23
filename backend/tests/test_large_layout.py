@@ -1,7 +1,8 @@
 from app.blackboard import Blackboard
 from app.config import SimulationConfig
 from app.controller.policies import create_assignment_policy
-from app.pathfinding import astar, shortest_path_distances
+from app.navigator.planners.astar_planner import astar
+from app.pathfinding import shortest_path_distances
 from app.simulation import SimulationEngine
 
 

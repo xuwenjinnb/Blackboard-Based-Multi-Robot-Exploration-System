@@ -12,11 +12,18 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from .blackboard import now_ms
-from .auth import AuthStore, ROLE_ADMIN, ROLE_ANALYST, ROLE_OPERATOR
-from .config import redis_config_from_env, simulation_config_from_env
+from .config import simulation_config_from_env
 from .controller.policies import create_assignment_policy
-from .redis_blackboard import RedisBlackboard
-from .replays import ReplayStore, coverage
+from .redis import (
+    AuthStore,
+    RedisBlackboard,
+    ReplayStore,
+    ROLE_ADMIN,
+    ROLE_ANALYST,
+    ROLE_OPERATOR,
+    coverage,
+    redis_config_from_env,
+)
 from .simulation import SimulationEngine
 from .workers.common import env_bool, env_float, persist_runtime_config
 
@@ -65,7 +72,7 @@ app.add_middleware(
 )
 redis_config = redis_config_from_env()
 blackboard = RedisBlackboard(
-    redis_config.url,
+    redis_config,
     prefix=redis_config.prefix,
     width=redis_config.map_width,
     height=redis_config.map_height,

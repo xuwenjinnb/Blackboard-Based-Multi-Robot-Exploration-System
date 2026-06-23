@@ -8,6 +8,7 @@ def unknown_cells_visible_from(
     cell_map: dict[tuple[int, int], dict[str, Any]],
     scan_radius: int,
 ) -> int:
+    """输入 frontier 坐标和地图格子，输出扫描半径内可见 UNKNOWN 格子数量。"""
     gain = 0
     for y in range(position["y"] - scan_radius, position["y"] + scan_radius + 1):
         for x in range(position["x"] - scan_radius, position["x"] + scan_radius + 1):
@@ -22,6 +23,7 @@ def point_tuple(point: dict[str, int]) -> tuple[int, int]:
 
 
 def occupied_positions(snapshot: dict[str, Any]) -> set[tuple[int, int]]:
+    """输入黑板快照，输出当前车辆位置和未完成任务目标占用的坐标集合。"""
     occupied = {
         point_tuple(vehicle["pose"]["position"])
         for vehicle in snapshot.get("vehicles", [])

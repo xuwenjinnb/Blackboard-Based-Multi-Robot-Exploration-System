@@ -6,12 +6,15 @@ import time
 from dataclasses import replace
 from typing import Any
 
-from redis import RedisError
-
 from ..blackboard import now_ms
-from ..config import SimulationConfig, redis_config_from_env, simulation_config_from_env
+from ..config import SimulationConfig, simulation_config_from_env
 from ..controller.policies import AssignmentPolicy, create_assignment_policy
-from ..redis_blackboard import RedisBlackboard
+from ..redis import (
+    RedisBlackboard,
+    TRANSIENT_REDIS_ERRORS,
+    log_transient_redis_error,
+    redis_config_from_env,
+)
 
 
 RUNTIME_HASH = "runtime"
@@ -57,14 +60,14 @@ def create_blackboard(wait: bool = True) -> RedisBlackboard:
     while True:
         try:
             return RedisBlackboard(
-                config.url,
+                config,
                 prefix=config.prefix,
                 width=config.map_width,
                 height=config.map_height,
                 chunk_size=config.map_chunk_size,
                 reset_on_start=config.reset_on_start,
             )
-        except RedisError as exc:
+        except TRANSIENT_REDIS_ERRORS as exc:
             if not wait:
                 raise
             print(f"[worker] Redis unavailable: {exc}. Retrying in 2s...")

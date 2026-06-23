@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...pathfinding import astar, manhattan
+from ...navigator.planners.astar_planner import astar
+from ...pathfinding import manhattan
 from .base import AssignmentDecision
 from .helpers import occupied_positions, point_tuple, unknown_cells_visible_from
 

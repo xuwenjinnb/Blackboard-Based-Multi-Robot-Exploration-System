@@ -7,7 +7,9 @@ from typing import Any, Callable, TypeVar
 
 import redis
 
-from .blackboard import Blackboard, now_ms
+from ..blackboard import Blackboard, now_ms
+from .client import create_redis_client
+from .config import RedisConfig
 
 
 T = TypeVar("T")
@@ -27,7 +29,7 @@ class RedisBlackboard(Blackboard):
 
     def __init__(
         self,
-        redis_url: str,
+        redis_config: RedisConfig | str,
         *,
         prefix: str = "inspection",
         width: int = 50,
@@ -39,8 +41,7 @@ class RedisBlackboard(Blackboard):
         self.height = self._normalize_dimension(height, "height")
         self.chunk_size = self._normalize_chunk_size(chunk_size)
         self.prefix = prefix.rstrip(":")
-        self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
-        self.redis.ping()
+        self.redis = create_redis_client(redis_config)
         self.lock = threading.RLock()
         self._local = threading.local()
         self._sync_depth = 0

@@ -8,7 +8,7 @@ import pytest
 
 redis = pytest.importorskip("redis")
 
-from app.redis_blackboard import RedisBlackboard
+from app.redis import RedisBlackboard
 
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/15")

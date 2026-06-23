@@ -10,8 +10,9 @@ if str(ROOT) not in sys.path:
 from app.blackboard import Blackboard, now_ms
 from app.config import SimulationConfig
 from app.navigator import NavigatorComponent
+from app.navigator.planners.astar_planner import astar
 from app.navigator.planners.cbs_planner import CBSPlanner
-from app.pathfinding import astar, st_astar
+from app.navigator.planners.st_astar_planner import st_astar
 from app.controller.policies import (
     AssignmentDecision,
     NearestReachableFrontierPolicy,

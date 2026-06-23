@@ -7,8 +7,7 @@ import pytest
 
 redis = pytest.importorskip("redis")
 
-from app.auth import AuthStore, ROLE_ANALYST, ROLE_OPERATOR
-from app.replays import ReplayStore
+from app.redis import AuthStore, ReplayStore, ROLE_ANALYST, ROLE_OPERATOR
 
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/15")
