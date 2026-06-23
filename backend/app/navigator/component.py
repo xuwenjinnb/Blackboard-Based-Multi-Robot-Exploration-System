@@ -15,7 +15,7 @@ class NavigatorComponent:
     def __init__(self, blackboard: Blackboard, config: SimulationConfig, navigator_ids: list[str] | None = None) -> None:
         self.blackboard = blackboard
         self.config = config
-        self.navigator_ids = navigator_ids or ["navigator-01", "navigator-02"]
+        self.navigator_ids = navigator_ids or ["navigator-01"]
 
     def run_once(self) -> None:
         if self.config.navigator_algorithm.strip().lower() == "cbs":

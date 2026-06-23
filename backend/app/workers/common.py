@@ -78,12 +78,10 @@ def read_runtime_config(blackboard: RedisBlackboard, fallback: SimulationConfig)
     raw: dict[str, Any] = blackboard.redis.hgetall(blackboard.key(RUNTIME_HASH))
     policy = raw.get("policy") or fallback.policy
     navigator_algorithm = raw.get("navigatorAlgorithm") or fallback.navigator_algorithm
-    navigator_count = _runtime_int(raw.get("navigatorCount"), fallback.navigator_count)
     return replace(
         fallback,
         policy=str(policy),
         navigator_algorithm=str(navigator_algorithm),
-        navigator_count=max(1, min(12, navigator_count)),
     )
 
 
@@ -93,7 +91,6 @@ def persist_runtime_config(blackboard: RedisBlackboard, config: SimulationConfig
         mapping={
             "policy": config.policy,
             "navigatorAlgorithm": config.navigator_algorithm,
-            "navigatorCount": str(config.navigator_count),
             "updatedAt": str(now_ms()),
         },
     )

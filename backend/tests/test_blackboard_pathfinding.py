@@ -1,4 +1,5 @@
 ﻿import sys
+import copy
 from pathlib import Path
 
 import pytest
@@ -221,6 +222,85 @@ def test_vehicle_redeployment_clears_previous_visible_area():
 
     assert stale_visible
     assert all(cell_map[point]["state"] == "UNKNOWN" for point in stale_visible)
+
+
+@pytest.mark.parametrize("system_status", ["PAUSED", "STOPPED"])
+def test_vehicle_reduction_removes_largest_ids_without_resetting_map(system_status):
+    board = Blackboard()
+    simulation = SimulationEngine(board)
+    simulation.configure_vehicle_deployment(count=5, mode="random")
+    before_ids = sorted(vehicle["vehicleId"] for vehicle in board.snapshot()["vehicles"])
+    assert before_ids == ["car-01", "car-02", "car-03", "car-04", "car-05"]
+
+    frontier = board.save_frontier(
+        {"position": {"x": 1, "y": 1}, "unknownGain": 1, "discoveredBy": "test"}
+    )
+    task = board.create_task_for_frontier("car-05", frontier)
+    request = board.create_navigation_request(task)
+    board.write_navigation_plan(
+        {
+            "requestId": request["requestId"],
+            "taskId": task["taskId"],
+            "vehicleId": "car-05",
+            "start": request["start"],
+            "goal": request["goal"],
+            "path": [],
+            "status": "SUCCESS",
+            "createdBy": "navigator-test",
+        }
+    )
+    board.set_system_status(system_status)
+    before = board.snapshot()
+    before_visible = {
+        (cell["x"], cell["y"])
+        for cell in before["map"]["cells"]
+        if cell["state"] in {"FREE", "VISITED"}
+    }
+
+    deployment = simulation.configure_vehicle_deployment(count=3, mode="random")
+
+    snapshot = board.snapshot()
+    after_ids = sorted(vehicle["vehicleId"] for vehicle in snapshot["vehicles"])
+    after_visible = {
+        (cell["x"], cell["y"])
+        for cell in snapshot["map"]["cells"]
+        if cell["state"] in {"FREE", "VISITED"}
+    }
+    assert after_ids == ["car-01", "car-02", "car-03"]
+    assert deployment["mode"] == "count-adjust"
+    assert deployment["count"] == 3
+    assert snapshot["systemStatus"] == system_status
+    assert snapshot["map"]["version"] == before["map"]["version"]
+    assert before_visible <= after_visible
+    assert all(task["vehicleId"] != "car-05" for task in snapshot["tasks"])
+    assert all(request["vehicleId"] != "car-05" for request in snapshot["navigationRequests"])
+    assert all(plan["vehicleId"] != "car-05" for plan in snapshot["navigationPlans"])
+    assert board.frontiers[frontier["frontierId"]]["status"] == "OPEN"
+
+
+@pytest.mark.parametrize("system_status", ["PAUSED", "STOPPED"])
+def test_vehicle_increase_preserves_existing_vehicles_and_adds_next_ids(system_status):
+    board = Blackboard()
+    simulation = SimulationEngine(board)
+    simulation.configure_vehicle_deployment(count=3, mode="random")
+    board.set_system_status(system_status)
+    before = board.snapshot()
+    before_positions = {vehicle["vehicleId"]: dict(vehicle["pose"]["position"]) for vehicle in before["vehicles"]}
+    before_map = copy.deepcopy(before["map"])
+
+    deployment = simulation.configure_vehicle_deployment(count=5, mode="random")
+
+    snapshot = board.snapshot()
+    after_positions = {
+        vehicle["vehicleId"]: vehicle["pose"]["position"]
+        for vehicle in snapshot["vehicles"]
+    }
+    assert sorted(after_positions) == ["car-01", "car-02", "car-03", "car-04", "car-05"]
+    assert deployment["count"] == 5
+    assert snapshot["systemStatus"] == system_status
+    assert snapshot["map"] == before_map
+    for vehicle_id, position in before_positions.items():
+        assert after_positions[vehicle_id] == position
 
 
 def test_map_patch_updates_version_and_cells():

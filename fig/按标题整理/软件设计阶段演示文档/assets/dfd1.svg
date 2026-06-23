@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#1594c6"/>
+    </marker>
+    <style>
+      .bg{fill:#fff}
+      .entity{fill:#8fcdda;stroke:#4b98a8;stroke-width:1.5}
+      .process{fill:#10a7dc;stroke:#0c7fa8;stroke-width:1.8}
+      .storeLine{stroke:#1594c6;stroke-width:2}
+      .flow{fill:none;stroke:#1594c6;stroke-width:2.2;marker-end:url(#arrow)}
+      .title{font:700 28px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#1683ad}
+      .txt{font:18px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#fff}
+      .ptxt{font:17px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#fff;font-weight:700}
+      .stxt{font:18px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#1683ad}
+      .label{font:15px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#1683ad}
+    </style>
+  </defs>
+  <rect class="bg" width="1500" height="900"/>
+  <text x="52" y="48" class="title">多小车协作巡检仿真系统一层数据流图</text>
+
+  <rect x="55" y="205" width="95" height="165" class="entity"/>
+  <text x="102" y="280" text-anchor="middle" class="txt"><tspan x="102" dy="0">超级管</tspan><tspan x="102" dy="28">理员</tspan></text>
+
+  <rect x="250" y="610" width="160" height="62" class="entity"/>
+  <text x="330" y="648" text-anchor="middle" class="txt">配置员</text>
+
+  <rect x="250" y="80" width="160" height="62" class="entity"/>
+  <text x="330" y="118" text-anchor="middle" class="txt">分析员</text>
+
+  <circle cx="420" cy="285" r="92" class="process"/>
+  <text x="420" y="264" text-anchor="middle" class="ptxt"><tspan x="420" dy="0">1.用户管理</tspan><tspan x="420" dy="28">子系统</tspan></text>
+
+  <circle cx="785" cy="295" r="92" class="process"/>
+  <text x="785" y="274" text-anchor="middle" class="ptxt"><tspan x="785" dy="0">2.实验配置</tspan><tspan x="785" dy="28">子系统</tspan></text>
+
+  <circle cx="805" cy="655" r="92" class="process"/>
+  <text x="805" y="634" text-anchor="middle" class="ptxt"><tspan x="805" dy="0">3.地图探索</tspan><tspan x="805" dy="28">子系统</tspan></text>
+
+  <circle cx="1205" cy="185" r="92" class="process"/>
+  <text x="1205" y="164" text-anchor="middle" class="ptxt"><tspan x="1205" dy="0">4.回放分析</tspan><tspan x="1205" dy="28">子系统</tspan></text>
+
+  <g>
+    <line x1="535" y1="257" x2="720" y2="257" class="storeLine"/>
+    <line x1="535" y1="307" x2="720" y2="307" class="storeLine"/>
+    <text x="627" y="288" text-anchor="middle" class="stxt">用户信息表</text>
+  </g>
+  <g>
+    <line x1="640" y1="420" x2="830" y2="420" class="storeLine"/>
+    <line x1="640" y1="470" x2="830" y2="470" class="storeLine"/>
+    <text x="735" y="451" text-anchor="middle" class="stxt">运行配置表</text>
+  </g>
+  <g>
+    <line x1="790" y1="482" x2="975" y2="482" class="storeLine"/>
+    <line x1="790" y1="532" x2="975" y2="532" class="storeLine"/>
+    <text x="882" y="513" text-anchor="middle" class="stxt">地图障碍表</text>
+  </g>
+  <g>
+    <line x1="1010" y1="430" x2="1195" y2="430" class="storeLine"/>
+    <line x1="1010" y1="480" x2="1195" y2="480" class="storeLine"/>
+    <text x="1102" y="461" text-anchor="middle" class="stxt">小车信息表</text>
+  </g>
+  <g>
+    <line x1="980" y1="620" x2="1180" y2="620" class="storeLine"/>
+    <line x1="980" y1="670" x2="1180" y2="670" class="storeLine"/>
+    <text x="1080" y="651" text-anchor="middle" class="stxt">任务导航表</text>
+  </g>
+  <g>
+    <line x1="1150" y1="735" x2="1340" y2="735" class="storeLine"/>
+    <line x1="1150" y1="785" x2="1340" y2="785" class="storeLine"/>
+    <text x="1245" y="766" text-anchor="middle" class="stxt">日志记录表</text>
+  </g>
+
+  <path d="M150 288 L328 286" class="flow"/>
+  <text x="195" y="270" class="label">用户管理请求</text>
+  <path d="M330 142 L390 198" class="flow"/>
+  <text x="334" y="182" class="label">登录信息</text>
+  <path d="M330 610 L390 370" class="flow"/>
+  <text x="290" y="475" class="label">登录信息</text>
+  <path d="M512 282 C540 250 600 245 535 257" class="flow"/>
+  <path d="M535 307 C515 330 500 350 470 360" class="flow"/>
+
+  <path d="M410 640 L695 345" class="flow"/>
+  <text x="518" y="510" class="label">实验配置</text>
+  <path d="M785 387 L742 420" class="flow"/>
+  <path d="M810 386 L865 482" class="flow"/>
+  <path d="M875 332 C980 345 1040 390 1100 430" class="flow"/>
+
+  <path d="M760 470 C720 535 720 600 732 628" class="flow"/>
+  <path d="M882 532 C855 565 835 585 820 565" class="flow"/>
+  <path d="M1100 480 C1050 560 960 620 895 642" class="flow"/>
+  <path d="M897 655 L980 645" class="flow"/>
+  <path d="M980 670 C910 720 840 735 805 747" class="flow"/>
+  <path d="M895 700 C990 740 1065 760 1150 760" class="flow"/>
+
+  <path d="M410 111 C650 120 900 140 1115 175" class="flow"/>
+  <text x="760" y="118" class="label">回放查询请求</text>
+  <path d="M1245 735 C1250 610 1240 390 1210 277" class="flow"/>
+  <path d="M1195 455 C1255 390 1248 292 1226 274" class="flow"/>
+  <path d="M1180 645 C1240 560 1235 370 1218 275" class="flow"/>
+  <path d="M1118 188 C880 210 745 260 720 257" class="flow"/>
+</svg>

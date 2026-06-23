@@ -128,13 +128,6 @@ export function setNavigatorAlgorithm(navigatorAlgorithm) {
 	});
 }
 
-export function setNavigatorCount(count) {
-	return request("/runtime/navigators", {
-		method: "POST",
-		body: JSON.stringify({ count }),
-	});
-}
-
 export function setVehicles(payload) {
 	return request("/runtime/vehicles", {
 		method: "POST",

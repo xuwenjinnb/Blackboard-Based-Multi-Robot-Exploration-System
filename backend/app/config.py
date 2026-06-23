@@ -8,7 +8,6 @@ from dataclasses import dataclass
 class SimulationConfig:
     policy: str = "nearest"
     navigator_algorithm: str = "baseline"
-    navigator_count: int = 2
     scan_radius: int = 2
     frontier_search_radius: int = 5
     use_st_astar: bool = True
@@ -26,7 +25,6 @@ def simulation_config_from_env() -> SimulationConfig:
     return SimulationConfig(
         policy=os.getenv("INSPECTION_POLICY", "nearest"),
         navigator_algorithm=os.getenv("INSPECTION_NAVIGATOR_ALGORITHM", "baseline"),
-        navigator_count=_env_int("INSPECTION_NAVIGATOR_COUNT", 2),
         scan_radius=_env_int("INSPECTION_SCAN_RADIUS", 2),
         frontier_search_radius=_env_int("INSPECTION_FRONTIER_SEARCH_RADIUS", 5),
         use_st_astar=_env_bool("INSPECTION_USE_ST_ASTAR", True),

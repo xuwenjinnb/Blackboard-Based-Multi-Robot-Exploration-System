@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#222"/>
+    </marker>
+    <style>
+      .process{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .flow{fill:none;stroke:#222;stroke-width:2;marker-end:url(#arrow)}
+      .storeLine{stroke:#222;stroke-width:1.7}
+      .title{font:700 26px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .txt{font:17px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .label{font:14px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+    </style>
+  </defs>
+  <rect width="1500" height="930" fill="#fff"/>
+  <text x="45" y="50" class="title">3.地图探索子系统二层数据流图</text>
+
+  <circle cx="245" cy="180" r="78" class="process"/>
+  <text x="245" y="166" text-anchor="middle" class="txt"><tspan x="245" dy="0">3.1</tspan><tspan x="245" dy="27">小车扫描</tspan></text>
+
+  <circle cx="540" cy="180" r="78" class="process"/>
+  <text x="540" y="166" text-anchor="middle" class="txt"><tspan x="540" dy="0">3.2</tspan><tspan x="540" dy="27">前沿发现</tspan></text>
+
+  <circle cx="820" cy="410" r="82" class="process"/>
+  <text x="820" y="396" text-anchor="middle" class="txt"><tspan x="820" dy="0">3.3</tspan><tspan x="820" dy="27">任务分配</tspan></text>
+
+  <circle cx="1120" cy="410" r="82" class="process"/>
+  <text x="1120" y="396" text-anchor="middle" class="txt"><tspan x="1120" dy="0">3.4</tspan><tspan x="1120" dy="27">路径规划</tspan></text>
+
+  <circle cx="540" cy="685" r="82" class="process"/>
+  <text x="540" y="671" text-anchor="middle" class="txt"><tspan x="540" dy="0">3.5</tspan><tspan x="540" dy="27">路径执行</tspan></text>
+
+  <g>
+    <line x1="120" y1="375" x2="360" y2="375" class="storeLine"/>
+    <line x1="120" y1="425" x2="360" y2="425" class="storeLine"/>
+    <text x="240" y="407" text-anchor="middle" class="txt">地图障碍表</text>
+  </g>
+  <g>
+    <line x1="420" y1="375" x2="660" y2="375" class="storeLine"/>
+    <line x1="420" y1="425" x2="660" y2="425" class="storeLine"/>
+    <text x="540" y="407" text-anchor="middle" class="txt">小车信息表</text>
+  </g>
+  <g>
+    <line x1="695" y1="150" x2="935" y2="150" class="storeLine"/>
+    <line x1="695" y1="200" x2="935" y2="200" class="storeLine"/>
+    <text x="815" y="182" text-anchor="middle" class="txt">前沿点表</text>
+  </g>
+  <g>
+    <line x1="1000" y1="600" x2="1260" y2="600" class="storeLine"/>
+    <line x1="1000" y1="650" x2="1260" y2="650" class="storeLine"/>
+    <text x="1130" y="632" text-anchor="middle" class="txt">任务导航表</text>
+  </g>
+  <g>
+    <line x1="1040" y1="755" x2="1280" y2="755" class="storeLine"/>
+    <line x1="1040" y1="805" x2="1280" y2="805" class="storeLine"/>
+    <text x="1160" y="787" text-anchor="middle" class="txt">日志记录表</text>
+  </g>
+
+  <path d="M245 258 L240 375" class="flow"/>
+  <text x="150" y="310" class="label">地图 patch</text>
+  <path d="M360 400 C430 360 485 260 520 254" class="flow"/>
+  <text x="405" y="333" class="label">地图格子状态</text>
+  <path d="M323 180 L462 180" class="flow"/>
+  <text x="375" y="165" class="label">扫描结果</text>
+  <path d="M618 180 L695 175" class="flow"/>
+  <text x="625" y="155" class="label">前沿点</text>
+
+  <path d="M815 200 C815 275 815 330 817 328" class="flow"/>
+  <text x="830" y="267" class="label">OPEN frontier</text>
+  <path d="M660 400 L738 410" class="flow"/>
+  <text x="675" y="390" class="label">空闲小车</text>
+  <path d="M902 410 L1038 410" class="flow"/>
+  <text x="948" y="392" class="label">导航请求</text>
+
+  <path d="M1120 492 L1130 600" class="flow"/>
+  <text x="1142" y="548" class="label">路径计划</text>
+  <path d="M1000 625 C860 625 705 650 622 676" class="flow"/>
+  <text x="760" y="650" class="label">pathQueue</text>
+  <path d="M540 603 L540 425" class="flow"/>
+  <text x="560" y="520" class="label">更新小车状态</text>
+  <path d="M458 685 C310 640 245 500 240 425" class="flow"/>
+  <text x="300" y="612" class="label">移动后继续扫描</text>
+
+  <path d="M622 710 C750 760 920 790 1040 780" class="flow"/>
+  <text x="770" y="748" class="label">完成 / 阻塞事件</text>
+  <path d="M622 700 C770 710 910 675 1000 625" class="flow"/>
+  <text x="760" y="702" class="label">任务进度</text>
+  <path d="M240 375 C310 330 430 255 498 235" class="flow"/>
+  <path d="M420 400 C360 360 300 300 265 257" class="flow"/>
+  <text x="315" y="350" class="label">车辆位置</text>
+</svg>

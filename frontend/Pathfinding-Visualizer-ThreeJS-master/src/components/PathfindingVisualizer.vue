@@ -17,6 +17,7 @@
 			:thresholdValue="thresholdValue"
 			:backendMode="true"
 			:vehicles="displayVehicles"
+			:vehicleModel="backendControls.vehicleModel"
 			:frontiers="displayFrontiers"
 			:pathsByVehicle="displayPathsByVehicle"
 			:showGrid="layers.grid"
@@ -106,45 +107,38 @@
 					{{ item.name || item.id }}
 				</option>
 			</select>
-			<input
-				class="navigator-count"
-				type="number"
-				min="1"
-				max="12"
-				v-model.number="backendControls.navigatorCount"
-				:disabled="backendBusy || backendStatus === 'RUNNING'"
-				@input="navigatorConfigDirty = true"
-				key="navigator-count"
-				title="导航器数量"
-			>
-			<Button
-				class="info"
-				@click.stop="handleNavigatorCountApply"
-				:disabled="backendBusy || backendStatus === 'RUNNING'"
-				key="navigator-count-apply"
-			>
-				<span class="lg">导航器 {{ backendControls.navigatorCount }}</span>
-				<span class="sm">导航器</span>
-			</Button>
-			<input
-				class="vehicle-count"
-				type="number"
-				min="1"
-				max="12"
-				v-model.number="backendControls.vehicleCount"
-				:disabled="backendBusy || backendStatus !== 'STOPPED'"
-				@input="deploymentDirty = true"
-				key="vehicle-count"
-			>
-			<Button
-				class="info"
-				@click.stop="handleVehiclesApply"
-				:disabled="backendBusy || backendStatus !== 'STOPPED'"
-				key="vehicle-random"
-			>
-				<span class="lg">随机部署车辆</span>
-				<span class="sm">车辆</span>
-			</Button>
+			<div class="vehicle-controls" key="vehicle-controls">
+				<input
+					class="vehicle-count"
+					type="number"
+					min="1"
+					max="12"
+					v-model.number="backendControls.vehicleCount"
+					:disabled="backendBusy || backendStatus === 'RUNNING'"
+					@input="deploymentDirty = true"
+					title="车辆数量"
+				>
+				<Button
+					class="info"
+					@click.stop="handleVehiclesApply"
+					:disabled="backendBusy || backendStatus === 'RUNNING'"
+				>
+					<span class="lg">车辆 {{ backendControls.vehicleCount }}</span>
+					<span class="sm">车辆</span>
+				</Button>
+				<label class="vehicle-skin-picker" title="车辆皮肤">
+					<span>皮肤</span>
+					<select
+						id="vehicle-skin"
+						class="vehicle-skin"
+						v-model="backendControls.vehicleModel"
+					>
+						<option :value="skin.id" v-for="skin in vehicleSkinOptions" :key="skin.id">
+							{{ skin.name }}
+						</option>
+					</select>
+				</label>
+			</div>
 			<input
 				class="map-size"
 				type="number"
@@ -267,7 +261,6 @@ import {
 	setObstacleCells,
 	setObstacles,
 	setNavigatorAlgorithm,
-	setNavigatorCount,
 	setPolicy,
 	setVehicles,
 	startSimulation,
@@ -293,6 +286,34 @@ const DEFAULT_NAVIGATORS = [
 	{ id: "cbs", name: "CBS 冲突搜索" },
 ];
 
+const VEHICLE_SKINS = [
+	{ id: "sedan", name: "轿车" },
+	{ id: "sedan-sports", name: "运动轿车" },
+	{ id: "hatchback-sports", name: "掀背跑车" },
+	{ id: "race", name: "赛车" },
+	{ id: "race-future", name: "未来赛车" },
+	{ id: "taxi", name: "出租车" },
+	{ id: "police", name: "警车" },
+	{ id: "ambulance", name: "救护车" },
+	{ id: "delivery", name: "配送车" },
+	{ id: "delivery-flat", name: "平板配送车" },
+	{ id: "van", name: "厢式车" },
+	{ id: "suv", name: "SUV" },
+	{ id: "suv-luxury", name: "豪华 SUV" },
+	{ id: "truck", name: "卡车" },
+	{ id: "truck-flat", name: "平板卡车" },
+	{ id: "firetruck", name: "消防车" },
+	{ id: "garbage-truck", name: "垃圾车" },
+	{ id: "tractor", name: "拖拉机" },
+	{ id: "tractor-shovel", name: "铲斗拖拉机" },
+	{ id: "tractor-police", name: "巡逻拖拉机" },
+	{ id: "kart-oodi", name: "卡丁车 Oodi" },
+	{ id: "kart-ooli", name: "卡丁车 Ooli" },
+	{ id: "kart-oopi", name: "卡丁车 Oopi" },
+	{ id: "kart-oobi", name: "卡丁车 Oobi" },
+	{ id: "kart-oozi", name: "卡丁车 Oozi" },
+];
+
 const POLICY_NAMES = Object.fromEntries(DEFAULT_POLICIES.map((item) => [item.id, item.name]));
 const NAVIGATOR_NAMES = Object.fromEntries(DEFAULT_NAVIGATORS.map((item) => [item.id, item.name]));
 const STATUS_NAMES = {
@@ -311,7 +332,6 @@ export default {
 		backendInitialized: false,
 		backendBusy: false,
 		deploymentDirty: false,
-		navigatorConfigDirty: false,
 		mapConfigDirty: false,
 		obstacleEditMode: false,
 		obstaclePaint: {
@@ -322,8 +342,8 @@ export default {
 		backendControls: {
 			policy: "nearest",
 			navigatorAlgorithm: "baseline",
-			navigatorCount: 2,
 			vehicleCount: 8,
+			vehicleModel: "sedan",
 			obstacleCount: 120,
 			mapWidth: 50,
 			mapHeight: 50,
@@ -427,6 +447,9 @@ export default {
 				name: NAVIGATOR_NAMES[item.id] || item.name || item.id,
 			}));
 		},
+		vehicleSkinOptions() {
+			return VEHICLE_SKINS;
+		},
 	},
 	watch: {
 		backendRuntime: {
@@ -478,9 +501,6 @@ export default {
 			if (runtime.navigatorAlgorithm) {
 				this.backendControls.navigatorAlgorithm = runtime.navigatorAlgorithm;
 			}
-			if (runtime.navigatorCount && !this.navigatorConfigDirty) {
-				this.backendControls.navigatorCount = runtime.navigatorCount;
-			}
 			if (runtime.vehicleDeployment && !this.deploymentDirty) {
 				this.backendControls.vehicleCount = runtime.vehicleDeployment.count || 8;
 			}
@@ -527,11 +547,8 @@ export default {
 		vehiclePayload() {
 			return {
 				count: Math.max(1, Math.min(12, Number(this.backendControls.vehicleCount) || 8)),
-				mode: "random",
+				mode: "adjust",
 			};
-		},
-		navigatorCountPayload() {
-			return Math.max(1, Math.min(12, Number(this.backendControls.navigatorCount) || 2));
 		},
 		mapPayload() {
 			return {
@@ -554,14 +571,9 @@ export default {
 					await setVehicles(this.vehiclePayload());
 					this.deploymentDirty = false;
 				}
-				if (this.navigatorConfigDirty) {
-					await setNavigatorCount(this.navigatorCountPayload());
-					this.navigatorConfigDirty = false;
-				}
 				return startSimulation({
 					policy: this.backendControls.policy,
 					navigatorAlgorithm: this.backendControls.navigatorAlgorithm,
-					navigatorCount: this.navigatorCountPayload(),
 				});
 			});
 		},
@@ -569,7 +581,13 @@ export default {
 			this.runBackendAction(() => pauseSimulation());
 		},
 		handleBackendResume() {
-			this.runBackendAction(() => resumeSimulation());
+			this.runBackendAction(async () => {
+				if (this.deploymentDirty) {
+					await setVehicles(this.vehiclePayload());
+					this.deploymentDirty = false;
+				}
+				return resumeSimulation();
+			});
 		},
 		handleBackendStop() {
 			this.runBackendAction(() => stopSimulation());
@@ -583,13 +601,6 @@ export default {
 		},
 		handleNavigatorChange() {
 			this.runBackendAction(() => setNavigatorAlgorithm(this.backendControls.navigatorAlgorithm));
-		},
-		handleNavigatorCountApply() {
-			this.runBackendAction(async () => {
-				const result = await setNavigatorCount(this.navigatorCountPayload());
-				this.navigatorConfigDirty = false;
-				return result;
-			});
 		},
 		async handleVehiclesApply() {
 			try {
@@ -817,7 +828,6 @@ export default {
 		}
 
 		select,
-		.navigator-count,
 		.vehicle-count,
 		.obstacle-count,
 		.map-size {
@@ -832,11 +842,46 @@ export default {
 			max-width: 190px;
 		}
 
-		.navigator-count,
 		.vehicle-count,
 		.obstacle-count,
 		.map-size {
 			width: 64px;
+		}
+
+		.vehicle-controls {
+			display: inline-flex;
+			align-items: center;
+			gap: 2px;
+			margin: 2px;
+
+			.btn,
+			.vehicle-count,
+			.vehicle-skin-picker {
+				margin: 0;
+			}
+		}
+
+		.vehicle-skin-picker {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			height: 40px;
+			padding: 0 0 0 10px;
+			border-radius: 3px;
+			background: rgba(255, 255, 255, 0.94);
+			color: #172033;
+			font-size: 12px;
+			font-weight: 700;
+
+			span {
+				white-space: nowrap;
+			}
+		}
+
+		.vehicle-skin {
+			min-width: 122px;
+			max-width: 148px;
+			margin: 0;
 		}
 	}
 
@@ -956,12 +1001,25 @@ export default {
 
 		.header {
 			select,
-			.navigator-count,
 			.vehicle-count,
 			.obstacle-count {
 				padding: 2px;
 				font-size: 0.7em;
 				max-width: 120px;
+			}
+
+			.vehicle-controls {
+				gap: 1px;
+			}
+
+			.vehicle-skin-picker {
+				padding-left: 6px;
+				font-size: 0.7em;
+			}
+
+			.vehicle-skin {
+				min-width: 88px;
+				max-width: 98px;
 			}
 		}
 

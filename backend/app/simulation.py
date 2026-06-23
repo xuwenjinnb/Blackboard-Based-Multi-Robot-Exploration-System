@@ -29,7 +29,7 @@ class SimulationEngine:
         self._task: asyncio.Task[None] | None = None
         self.tick = 0
         self.movement_steps = 0
-        self.navigator_ids = self._build_navigator_ids(self._config.navigator_count)
+        self.navigator_ids = ["navigator-01"]
         self.vehicle_deployment = self._build_random_vehicle_deployment(self._default_vehicle_count())
         self.robot_component = RobotComponent(self.blackboard, self._config)
         self.controller_component = ControllerComponent(
@@ -52,7 +52,6 @@ class SimulationEngine:
             self.controller_component.scan_radius = value.scan_radius
         if hasattr(self, "navigator_component"):
             self.navigator_component.config = value
-            self.navigator_ids = self._build_navigator_ids(value.navigator_count)
             self.navigator_component.navigator_ids = self.navigator_ids
 
     @property
@@ -115,36 +114,117 @@ class SimulationEngine:
         positions: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         with self.blackboard.batch():
-            normalized_mode = (mode or "random").strip().lower()
-            if normalized_mode in {"manual", "custom"} and positions:
-                self.vehicle_deployment = self._build_manual_vehicle_deployment(count, positions)
-            else:
-                self.vehicle_deployment = self._build_random_vehicle_deployment(count)
-            self._reset_runtime_for_vehicle_deployment_locked()
-            self.blackboard.add_event(
-                "controller",
-                "VEHICLES_CONFIGURED",
-                f"{self.vehicle_deployment['count']} vehicles deployed by {self.vehicle_deployment['mode']} mode",
-            )
-            return self.vehicle_deployment
+            requested_count = self._normalize_vehicle_count(count)
+            return self._adjust_vehicle_count_locked(requested_count)
 
-    def configure_navigator_count(self, count: int) -> dict[str, Any]:
-        with self.blackboard.batch():
-            previous_ids = set(self.navigator_ids)
-            next_ids = self._build_navigator_ids(count)
-            self.config = replace(self.config, navigator_count=len(next_ids))
-            self.navigator_ids = next_ids
-            self.navigator_component.navigator_ids = next_ids
-            for navigator_id in next_ids:
-                self.blackboard.update_heartbeat(navigator_id, "NAVIGATOR", "READY", None)
-            for navigator_id in previous_ids - set(next_ids):
-                self.blackboard.heartbeats.pop(navigator_id, None)
-            self.blackboard.add_event(
-                "navigator",
-                "NAVIGATORS_CONFIGURED",
-                f"{len(next_ids)} navigators configured",
+    def _adjust_vehicle_count_locked(self, requested_count: int) -> dict[str, Any]:
+        while len(self.blackboard.vehicles) > requested_count:
+            self._remove_vehicle_locked(self._max_vehicle_id_locked())
+
+        while len(self.blackboard.vehicles) < requested_count:
+            vehicle_id = self._next_vehicle_id_locked()
+            pose = self._random_free_vehicle_pose_locked()
+            if pose is None:
+                break
+            self.blackboard.register_vehicle(vehicle_id, pose)
+
+        self.vehicle_deployment = self._vehicle_deployment_from_current_locked("count-adjust")
+        self.blackboard.add_event(
+            "controller",
+            "VEHICLES_ADJUSTED",
+            f"{self.vehicle_deployment['count']} vehicles kept after count adjustment",
+        )
+        return self.vehicle_deployment
+
+    def _remove_vehicle_locked(self, vehicle_id: str) -> None:
+        removed_task_ids = {
+            task_id
+            for task_id, task in self.blackboard.tasks.items()
+            if task.get("vehicleId") == vehicle_id
+        }
+        for task_id in removed_task_ids:
+            task = self.blackboard.tasks.pop(task_id)
+            frontier_id = task.get("frontierId")
+            frontier = self.blackboard.frontiers.get(frontier_id)
+            if frontier and frontier.get("status") == "ASSIGNED":
+                frontier["status"] = "OPEN"
+
+        self.blackboard.navigation_requests = {
+            request_id: request
+            for request_id, request in self.blackboard.navigation_requests.items()
+            if request.get("vehicleId") != vehicle_id
+            and request.get("taskId") not in removed_task_ids
+        }
+        self.blackboard.navigation_plans = {
+            plan_id: plan
+            for plan_id, plan in self.blackboard.navigation_plans.items()
+            if plan.get("vehicleId") != vehicle_id
+            and plan.get("taskId") not in removed_task_ids
+        }
+        self.blackboard.vehicles.pop(vehicle_id, None)
+        self.blackboard.heartbeats.pop(vehicle_id, None)
+        self.blackboard.add_event(vehicle_id, "VEHICLE_REMOVED", f"{vehicle_id} removed during count adjustment")
+
+    def _random_free_vehicle_pose_locked(self) -> dict[str, Any] | None:
+        occupied = {
+            (
+                int(vehicle.get("pose", {}).get("position", {}).get("x", -1)),
+                int(vehicle.get("pose", {}).get("position", {}).get("y", -1)),
             )
-            return {"count": len(next_ids), "navigatorIds": next_ids}
+            for vehicle in self.blackboard.vehicles.values()
+        }
+        obstacles = set(getattr(self.blackboard, "true_obstacles", set()))
+        candidates = [
+            (x, y)
+            for y in range(1, self.blackboard.height - 1)
+            for x in range(1, self.blackboard.width - 1)
+            if (x, y) not in obstacles
+            and (x, y) not in occupied
+        ]
+        if not candidates:
+            return None
+        x, y = random.choice(candidates)
+        return {"position": {"x": x, "y": y}, "heading": random.choice([0, 90, 180, 270])}
+
+    def _vehicle_deployment_from_current_locked(self, mode: str) -> dict[str, Any]:
+        vehicles = sorted(
+            self.blackboard.vehicles.values(),
+            key=lambda vehicle: self._vehicle_id_sort_key(str(vehicle.get("vehicleId", ""))),
+        )
+        return {
+            "mode": mode,
+            "count": len(vehicles),
+            "vehicles": [
+                {
+                    "vehicleId": vehicle["vehicleId"],
+                    "x": int(vehicle.get("pose", {}).get("position", {}).get("x", 0)),
+                    "y": int(vehicle.get("pose", {}).get("position", {}).get("y", 0)),
+                    "heading": int(vehicle.get("pose", {}).get("heading", 0)),
+                    "source": "CURRENT",
+                    "adjusted": True,
+                    "requested": None,
+                }
+                for vehicle in vehicles
+            ],
+        }
+
+    def _max_vehicle_id_locked(self) -> str:
+        if not self.blackboard.vehicles:
+            raise ValueError("no vehicle to remove")
+        return max(self.blackboard.vehicles.keys(), key=self._vehicle_id_sort_key)
+
+    def _next_vehicle_id_locked(self) -> str:
+        sort_keys = [
+            self._vehicle_id_sort_key(vehicle_id)
+            for vehicle_id in self.blackboard.vehicles.keys()
+        ]
+        existing_numbers = [
+            number
+            for prefix, number, _ in sort_keys
+            if prefix == "car-" and number >= 0
+        ]
+        next_number = (max(existing_numbers) if existing_numbers else 0) + 1
+        return f"car-{next_number:02d}"
 
     def configure_obstacles(
         self,
@@ -390,9 +470,16 @@ class SimulationEngine:
             return int(position["x"]), int(position["y"])
         raise ValueError("vehicle position requires x/y, position, or pose.position")
 
-    def _build_navigator_ids(self, count: int | None = None) -> list[str]:
-        requested_count = max(1, min(12, int(count or 2)))
-        return [f"navigator-{index + 1:02d}" for index in range(requested_count)]
+    @staticmethod
+    def _normalize_vehicle_count(count: int | None) -> int:
+        return max(1, min(12, int(count or 8)))
+
+    @staticmethod
+    def _vehicle_id_sort_key(vehicle_id: str) -> tuple[str, int, str]:
+        prefix = vehicle_id.rstrip("0123456789")
+        suffix = vehicle_id[len(prefix):]
+        number = int(suffix) if suffix else -1
+        return prefix, number, vehicle_id
 
     def _vehicle_deployment_count(self) -> int:
         vehicles = self.vehicle_deployment.get("vehicles") or []

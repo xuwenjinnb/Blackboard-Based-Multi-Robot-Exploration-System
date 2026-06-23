@@ -221,13 +221,23 @@ def configure_navigator_algorithm(algorithm: str) -> dict[str, Any]:
     return runtime_state()
 
 
-def configure_navigator_count(count: int) -> dict[str, Any]:
-    result = simulation.configure_navigator_count(count)
-    persist_runtime_config(blackboard, simulation.config)
-    return result
+def active_navigator_heartbeats() -> list[dict[str, Any]]:
+    stale_after_ms = int(max(1.0, env_float("NAVIGATOR_HEARTBEAT_TTL_SECONDS", 10.0)) * 1000)
+    minimum_updated_at = now_ms() - stale_after_ms
+    snapshot = blackboard.snapshot()
+    navigators = [
+        heartbeat
+        for heartbeat in snapshot.get("heartbeats", [])
+        if heartbeat.get("componentType") == "NAVIGATOR"
+        and heartbeat.get("status") != "OFFLINE"
+        and int(heartbeat.get("updatedAt") or 0) >= minimum_updated_at
+    ]
+    navigators.sort(key=lambda item: str(item.get("componentId", "")))
+    return navigators
 
 
 def runtime_state() -> dict[str, Any]:
+    navigator_heartbeats = active_navigator_heartbeats()
     return {
         "map": {
             "width": blackboard.width,
@@ -239,8 +249,9 @@ def runtime_state() -> dict[str, Any]:
         "policies": POLICY_OPTIONS,
         "navigatorAlgorithm": simulation.config.navigator_algorithm,
         "navigatorAlgorithms": NAVIGATOR_OPTIONS,
-        "navigatorCount": simulation.config.navigator_count,
-        "navigatorIds": simulation.navigator_ids,
+        "navigatorCount": len(navigator_heartbeats),
+        "navigatorIds": [item["componentId"] for item in navigator_heartbeats],
+        "navigatorHeartbeats": navigator_heartbeats,
         "vehicleDeployment": simulation.vehicle_deployment,
         "tick": simulation.tick,
         "movementSteps": simulation.movement_steps,
@@ -450,22 +461,10 @@ async def set_runtime_navigator(payload: dict[str, Any] | None = Body(default=No
     return configure_navigator_algorithm(str(payload.get("navigatorAlgorithm", "baseline")))
 
 
-@app.post("/runtime/navigators")
-async def set_runtime_navigators(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
-    if blackboard.system_status == "RUNNING":
-        raise HTTPException(status_code=409, detail="pause or stop the simulation before changing navigators")
-    payload = payload or {}
-    try:
-        result = configure_navigator_count(int(payload.get("count", simulation.config.navigator_count)))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return {"navigators": result, "runtime": runtime_state(), "snapshot": snapshot_with_runtime()}
-
-
 @app.post("/runtime/vehicles")
 async def set_runtime_vehicles(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
-    if blackboard.system_status in {"RUNNING", "PAUSED"}:
-        raise HTTPException(status_code=409, detail="stop the simulation before changing vehicles")
+    if blackboard.system_status == "RUNNING":
+        raise HTTPException(status_code=409, detail="pause or stop the simulation before changing vehicles")
     payload = payload or {}
     try:
         deployment = simulation.configure_vehicle_deployment(
@@ -609,8 +608,6 @@ async def control_start(
         configure_policy(str(payload["policy"]))
     if payload.get("navigatorAlgorithm"):
         configure_navigator_algorithm(str(payload["navigatorAlgorithm"]))
-    if payload.get("navigatorCount") is not None:
-        configure_navigator_count(int(payload["navigatorCount"]))
     simulation.ensure_demo_vehicles()
     result = blackboard.set_system_status("RUNNING")
     snapshot = snapshot_with_runtime()
@@ -675,8 +672,6 @@ async def apply_ws_control(message: dict[str, Any]) -> None:
             configure_policy(str(message["policy"]))
         if message.get("navigatorAlgorithm"):
             configure_navigator_algorithm(str(message["navigatorAlgorithm"]))
-        if message.get("navigatorCount") is not None:
-            configure_navigator_count(int(message["navigatorCount"]))
         simulation.ensure_demo_vehicles()
         blackboard.set_system_status("RUNNING")
         replay_store.start("websocket", runtime_state(), snapshot_with_runtime())

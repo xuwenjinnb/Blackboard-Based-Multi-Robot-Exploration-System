@@ -58,7 +58,8 @@ export default {
 		"showFrontiers",
 		"showPaths",
 		"obstacleEditMode",
-		"backendChangedCells"
+		"backendChangedCells",
+		"vehicleModel"
 	],
 	data: () => ({
 		scene: null,
@@ -89,6 +90,8 @@ export default {
 		walls: {},
 		vehicleMeshes: {},
 		vehicleModelTemplate: null,
+		vehicleModelTemplateName: "",
+		vehicleModelLoadToken: 0,
 		frontierMeshes: {},
 		pathMeshes: {},
 		overlayMaterials: {},
@@ -157,6 +160,9 @@ export default {
 	watch: {
 		controlType: function(newVal, oldVal) {
 			this.setControls();
+		},
+		vehicleModel: function(newVal, oldVal) {
+			if (newVal !== oldVal) this.loadVehicleModel();
 		},
 		backendChangedCells: {
 			handler(cells) {
@@ -706,21 +712,36 @@ export default {
 		},
 
 		loadVehicleModel() {
+			const modelName = this.normalizedVehicleModelName();
+			if (this.vehicleModelTemplate && this.vehicleModelTemplateName === modelName) return;
+
 			const loader = new GLTFLoader();
+			const loadToken = ++this.vehicleModelLoadToken;
 			const modelUrl =
-				"/static/assets/kenney-car-kit/Models/GLB%20format/sedan.glb";
+				`/static/assets/kenney-car-kit/Models/GLB%20format/${encodeURIComponent(modelName)}.glb`;
 
 			loader.load(
 				modelUrl,
 				(gltf) => {
+					if (this.destroyed || loadToken !== this.vehicleModelLoadToken) return;
 					this.vehicleModelTemplate = gltf.scene;
+					this.vehicleModelTemplateName = modelName;
 					this.rebuildVehicleMeshes();
 				},
 				undefined,
 				(error) => {
+					if (this.destroyed || loadToken !== this.vehicleModelLoadToken) return;
+					this.vehicleModelTemplate = null;
+					this.vehicleModelTemplateName = "";
+					this.rebuildVehicleMeshes();
 					console.error("小车模型加载失败，将继续使用简易模型。", error);
 				}
 			);
+		},
+
+		normalizedVehicleModelName() {
+			const modelName = String(this.vehicleModel || "sedan").replace(/[^a-z0-9-]/gi, "");
+			return modelName || "sedan";
 		},
 
 		rebuildVehicleMeshes() {

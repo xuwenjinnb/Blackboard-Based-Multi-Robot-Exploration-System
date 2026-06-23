@@ -13,8 +13,7 @@ from component_args import (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run one process hosting 1..N logical navigator workers.")
-    parser.add_argument("--navigator-ids", default="")
+    parser = argparse.ArgumentParser(description="Run one navigator worker process.")
     parser.add_argument("--component-id", default="")
     parser.add_argument("--batches-per-tick", type=int, default=3)
     add_worker_interval_argument(parser)
@@ -27,15 +26,12 @@ def main() -> None:
     ensure_backend_on_path()
     apply_common_environment(args)
     os.environ["NAVIGATOR_BATCHES_PER_TICK"] = str(args.batches_per_tick)
-    if args.navigator_ids.strip():
-        os.environ["NAVIGATOR_IDS"] = args.navigator_ids
-        os.environ.pop("COMPONENT_ID", None)
-    elif args.component_id.strip():
+    os.environ.pop("NAVIGATOR_ID", None)
+    os.environ.pop("NAVIGATOR_IDS", None)
+    if args.component_id.strip():
         os.environ["COMPONENT_ID"] = args.component_id
-        os.environ.pop("NAVIGATOR_IDS", None)
     else:
         os.environ.pop("COMPONENT_ID", None)
-        os.environ.pop("NAVIGATOR_IDS", None)
 
     from app.workers.navigator_worker import main as run_worker
 

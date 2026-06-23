@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1280" viewBox="0 0 2200 1280">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5f9fbd"/>
+    </marker>
+    <marker id="arrowSoft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#79aaa1"/>
+    </marker>
+  </defs>
+
+  <style>
+    .page { fill: #f6fbfd; }
+    .laneHead { fill: #e58ab4; stroke: #c36b96; stroke-width: 1.1; }
+    .laneText { fill: #ffffff; font: 700 22px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .lane { fill: #eaf7fc; stroke: #c5dbe7; stroke-width: 1.1; }
+    .start { fill: #e173a8; stroke: #b95582; stroke-width: 1.2; rx: 22; }
+    .box { fill: #9fd2e5; stroke: #5f9fbd; stroke-width: 1.2; rx: 8; }
+    .role { fill: #c9d7f2; stroke: #91a4cf; stroke-width: 1.2; rx: 8; }
+    .data { fill: #cce9e4; stroke: #79aaa1; stroke-width: 1.3; rx: 10; }
+    .decision { fill: #ef9fc3; stroke: #c86c98; stroke-width: 1.2; }
+    .txt { fill: #2f5064; font: 700 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .small { fill: #2f5064; font: 700 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .label { fill: #486b7d; font: 700 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; text-anchor: middle; paint-order: stroke fill; stroke: #f6fbfd; stroke-width: 5px; stroke-linejoin: round; }
+    .arrow { fill: none; stroke: #5f9fbd; stroke-width: 2.1; marker-end: url(#arrow); }
+    .arrowSoft { fill: none; stroke: #79aaa1; stroke-width: 2.1; marker-end: url(#arrowSoft); }
+    .dash { stroke-dasharray: 7 6; }
+  </style>
+
+  <rect class="page" x="0" y="0" width="2200" height="1280"/>
+
+  <!-- lane headers -->
+  <rect class="laneHead" x="20" y="20" width="330" height="52"/>
+  <rect class="laneHead" x="350" y="20" width="330" height="52"/>
+  <rect class="laneHead" x="680" y="20" width="360" height="52"/>
+  <rect class="laneHead" x="1040" y="20" width="380" height="52"/>
+  <rect class="laneHead" x="1420" y="20" width="380" height="52"/>
+  <rect class="laneHead" x="1800" y="20" width="380" height="52"/>
+  <text class="laneText" x="185" y="47">界面</text>
+  <text class="laneText" x="515" y="47">后端服务</text>
+  <text class="laneText" x="860" y="47">Redis黑板</text>
+  <text class="laneText" x="1230" y="47">小车</text>
+  <text class="laneText" x="1610" y="47">控制器</text>
+  <text class="laneText" x="1990" y="47">导航器</text>
+
+  <!-- lane bodies -->
+  <rect class="lane" x="20" y="72" width="330" height="1182"/>
+  <rect class="lane" x="350" y="72" width="330" height="1182"/>
+  <rect class="lane" x="680" y="72" width="360" height="1182"/>
+  <rect class="lane" x="1040" y="72" width="380" height="1182"/>
+  <rect class="lane" x="1420" y="72" width="380" height="1182"/>
+  <rect class="lane" x="1800" y="72" width="380" height="1182"/>
+
+  <!-- UI lane -->
+  <rect class="start" x="140" y="120" width="90" height="44"/>
+  <text class="txt" x="185" y="143">开始</text>
+
+  <rect class="box" x="80" y="205" width="210" height="58"/>
+  <text class="small" x="185" y="225"><tspan x="185" dy="0">显示登录界面</tspan><tspan x="185" dy="19">输入账号密码</tspan></text>
+
+  <polygon class="decision" points="185,300 285,355 185,410 85,355"/>
+  <text class="small" x="185" y="346"><tspan x="185" dy="0">登录</tspan><tspan x="185" dy="19">成功？</tspan></text>
+
+  <rect class="box" x="42" y="445" width="120" height="54"/>
+  <text class="small" x="102" y="464"><tspan x="102" dy="0">失败提示</tspan><tspan x="102" dy="19">返回登录</tspan></text>
+
+  <polygon class="decision" points="185,475 285,530 185,585 85,530"/>
+  <text class="small" x="185" y="521"><tspan x="185" dy="0">判断</tspan><tspan x="185" dy="19">用户角色</tspan></text>
+
+  <rect class="role" x="38" y="620" width="120" height="58"/>
+  <text class="small" x="98" y="640"><tspan x="98" dy="0">管理员</tspan><tspan x="98" dy="19">用户管理</tspan></text>
+
+  <rect class="role" x="212" y="620" width="120" height="58"/>
+  <text class="small" x="272" y="640"><tspan x="272" dy="0">分析员</tspan><tspan x="272" dy="19">回放分析</tspan></text>
+
+  <rect class="box" x="55" y="710" width="260" height="70"/>
+  <text class="small" x="185" y="730"><tspan x="185" dy="0">系统运行员进入 Dashboard</tspan><tspan x="185" dy="19">填写地图 / 小车配置</tspan><tspan x="185" dy="19">选择策略和算法</tspan></text>
+
+  <rect class="box" x="80" y="830" width="210" height="58"/>
+  <text class="small" x="185" y="850"><tspan x="185" dy="0">点击开始探索</tspan><tspan x="185" dy="19">暂停 / 继续 / 重置</tspan></text>
+
+  <rect class="box" x="45" y="1145" width="280" height="62"/>
+  <text class="small" x="185" y="1165"><tspan x="185" dy="0">实时显示地图、车辆</tspan><tspan x="185" dy="19">任务、路径和事件</tspan></text>
+
+  <!-- Backend lane -->
+  <rect class="box" x="390" y="205" width="250" height="62"/>
+  <text class="small" x="515" y="226"><tspan x="515" dy="0">校验账号密码</tspan><tspan x="515" dy="19">返回登录结果和角色</tspan></text>
+
+  <rect class="box" x="385" y="400" width="260" height="58"/>
+  <text class="small" x="515" y="420"><tspan x="515" dy="0">校验角色权限</tspan><tspan x="515" dy="19">处理管理 / 回放请求</tspan></text>
+
+  <rect class="box" x="385" y="830" width="260" height="70"/>
+  <text class="small" x="515" y="850"><tspan x="515" dy="0">接收配置 / 启动请求</tspan><tspan x="515" dy="19">写入 Redis 黑板</tspan><tspan x="515" dy="19">设置 RUNNING</tspan></text>
+
+  <rect class="box" x="390" y="1147" width="250" height="58"/>
+  <text class="small" x="515" y="1167"><tspan x="515" dy="0">生成状态快照</tspan><tspan x="515" dy="19">WebSocket 推送</tspan></text>
+
+  <!-- Redis lane -->
+  <rect class="data" x="720" y="390" width="280" height="92"/>
+  <text class="small" x="860" y="412"><tspan x="860" dy="0">用户 / 回放数据</tspan><tspan x="860" dy="23">auth users / sessions</tspan><tspan x="860" dy="23">replay frames</tspan></text>
+
+  <rect class="data" x="700" y="760" width="320" height="310"/>
+  <text class="small" x="860" y="790"><tspan x="860" dy="0">Redis 黑板共享状态</tspan><tspan x="860" dy="28">runtime config / systemStatus</tspan><tspan x="860" dy="28">map / vehicles / frontiers</tspan><tspan x="860" dy="28">tasks / navigationRequests</tspan><tspan x="860" dy="28">navigationPlans / events</tspan><tspan x="860" dy="28">heartbeats / replays</tspan></text>
+
+  <!-- Robot lane -->
+  <rect class="start" x="1168" y="745" width="124" height="44"/>
+  <text class="txt" x="1230" y="768">开始小车</text>
+
+  <rect class="box" x="1112" y="840" width="236" height="62"/>
+  <text class="small" x="1230" y="861"><tspan x="1230" dy="0">读取任务和 pathQueue</tspan><tspan x="1230" dy="19">写入心跳状态</tspan></text>
+
+  <polygon class="decision" points="1230,950 1340,1010 1230,1070 1120,1010"/>
+  <text class="small" x="1230" y="1001"><tspan x="1230" dy="0">已有</tspan><tspan x="1230" dy="19">可执行路径？</tspan></text>
+
+  <rect class="box" x="1072" y="1118" width="216" height="62"/>
+  <text class="small" x="1180" y="1139"><tspan x="1180" dy="0">扫描局部地图</tspan><tspan x="1180" dy="19">上传 patch / frontier</tspan></text>
+
+  <rect class="box" x="1298" y="1118" width="104" height="62"/>
+  <text class="small" x="1350" y="1139"><tspan x="1350" dy="0">执行路径</tspan><tspan x="1350" dy="19">更新状态</tspan></text>
+
+  <!-- Controller lane -->
+  <rect class="start" x="1545" y="745" width="130" height="44"/>
+  <text class="txt" x="1610" y="768">开始控制器</text>
+
+  <rect class="box" x="1492" y="840" width="236" height="62"/>
+  <text class="small" x="1610" y="861"><tspan x="1610" dy="0">读取 OPEN frontier</tspan><tspan x="1610" dy="19">读取 IDLE 小车</tspan></text>
+
+  <polygon class="decision" points="1610,950 1720,1010 1610,1070 1500,1010"/>
+  <text class="small" x="1610" y="1001"><tspan x="1610" dy="0">有可分配</tspan><tspan x="1610" dy="19">目标？</tspan></text>
+
+  <rect class="box" x="1495" y="1118" width="230" height="62"/>
+  <text class="small" x="1610" y="1139"><tspan x="1610" dy="0">执行 nearest / greedy</tspan><tspan x="1610" dy="19">创建 task / request</tspan></text>
+
+  <!-- Navigator lane -->
+  <rect class="start" x="1925" y="745" width="130" height="44"/>
+  <text class="txt" x="1990" y="768">开始导航器</text>
+
+  <rect class="box" x="1872" y="840" width="236" height="62"/>
+  <text class="small" x="1990" y="861"><tspan x="1990" dy="0">领取导航请求</tspan><tspan x="1990" dy="19">读取地图和车辆状态</tspan></text>
+
+  <polygon class="decision" points="1990,950 2100,1010 1990,1070 1880,1010"/>
+  <text class="small" x="1990" y="1001"><tspan x="1990" dy="0">找到</tspan><tspan x="1990" dy="19">路径？</tspan></text>
+
+  <rect class="box" x="1872" y="1118" width="236" height="62"/>
+  <text class="small" x="1990" y="1139"><tspan x="1990" dy="0">A* / 时空A* / CBS</tspan><tspan x="1990" dy="19">写回 SUCCESS / NO_PATH</tspan></text>
+
+  <!-- UI login flow -->
+  <line class="arrow" x1="185" y1="164" x2="185" y2="205"/>
+  <line class="arrow" x1="185" y1="263" x2="185" y2="300"/>
+  <line class="arrow" x1="290" y1="234" x2="390" y2="234"/>
+  <text class="label" x="340" y="222">登录请求</text>
+  <path class="arrowSoft" d="M 640 236 C 690 270 705 350 720 412"/>
+  <text class="label" x="704" y="318">读取用户信息</text>
+  <path class="arrow dash" d="M 390 252 C 342 280 312 325 285 355"/>
+  <text class="label" x="335" y="307">认证结果</text>
+  <line class="arrow" x1="185" y1="410" x2="185" y2="475"/>
+  <text class="label" x="213" y="438">是</text>
+  <path class="arrow" d="M 130 385 L 102 445"/>
+  <text class="label" x="112" y="424">否</text>
+
+  <!-- role split -->
+  <path class="arrow" d="M 120 566 L 98 620"/>
+  <text class="label" x="90" y="598">admin</text>
+  <path class="arrow" d="M 250 566 L 272 620"/>
+  <text class="label" x="282" y="598">analyst</text>
+  <line class="arrow" x1="185" y1="585" x2="185" y2="710"/>
+  <text class="label" x="226" y="654">operator</text>
+  <line class="arrow" x1="185" y1="780" x2="185" y2="830"/>
+
+  <!-- auth data and permission -->
+  <line class="arrowSoft" x1="645" y1="429" x2="720" y2="429"/>
+  <text class="label" x="682" y="416">读写数据</text>
+  <path class="arrowSoft" d="M 158 649 C 246 570 305 435 385 429"/>
+  <path class="arrowSoft" d="M 332 649 C 365 560 372 475 385 442"/>
+
+  <!-- runtime start -->
+  <path class="arrow" d="M 315 745 C 350 760 365 820 385 850"/>
+  <text class="label" x="346" y="790">配置请求</text>
+  <line class="arrow" x1="290" y1="859" x2="385" y2="865"/>
+  <text class="label" x="340" y="848">启动请求</text>
+  <line class="arrowSoft" x1="645" y1="865" x2="700" y2="865"/>
+
+  <!-- Redis reads: routed through the blank band above component boxes -->
+  <line class="arrowSoft" x1="1020" y1="871" x2="1112" y2="871"/>
+  <text class="label" x="1066" y="858">读任务/路径</text>
+  <path class="arrowSoft" d="M 1020 815 L 1460 815 L 1460 871 L 1492 871"/>
+  <text class="label" x="1240" y="806">读frontier/车辆</text>
+  <path class="arrowSoft" d="M 1020 835 L 1840 835 L 1840 871 L 1872 871"/>
+  <text class="label" x="1585" y="826">读request/map</text>
+
+  <!-- Component internal flow -->
+  <line class="arrow" x1="1230" y1="789" x2="1230" y2="840"/>
+  <line class="arrow" x1="1230" y1="902" x2="1230" y2="950"/>
+  <path class="arrow" d="M 1120 1010 C 1075 1044 1082 1092 1180 1118"/>
+  <text class="label" x="1084" y="1082">否</text>
+  <path class="arrow" d="M 1340 1010 C 1386 1044 1388 1092 1350 1118"/>
+  <text class="label" x="1382" y="1082">是</text>
+
+  <line class="arrow" x1="1610" y1="789" x2="1610" y2="840"/>
+  <line class="arrow" x1="1610" y1="902" x2="1610" y2="950"/>
+  <line class="arrow" x1="1610" y1="1070" x2="1610" y2="1118"/>
+  <text class="label" x="1638" y="1096">是</text>
+
+  <line class="arrow" x1="1990" y1="789" x2="1990" y2="840"/>
+  <line class="arrow" x1="1990" y1="902" x2="1990" y2="950"/>
+  <line class="arrow" x1="1990" y1="1070" x2="1990" y2="1118"/>
+  <text class="label" x="2028" y="1096">是/否</text>
+
+  <!-- Component writes back to Redis: bottom bus -->
+  <path class="arrowSoft" d="M 1072 1149 L 1048 1149 L 1048 1018 L 1020 1018"/>
+  <text class="label" x="1180" y="1198">写地图/frontier</text>
+  <path class="arrowSoft" d="M 1298 1180 L 1298 1210 L 1048 1210 L 1048 1038 L 1020 1038"/>
+  <text class="label" x="1350" y="1198">写车辆状态</text>
+  <path class="arrowSoft" d="M 1495 1180 L 1495 1230 L 1048 1230 L 1048 1058 L 1020 1058"/>
+  <text class="label" x="1610" y="1198">写task/request</text>
+  <path class="arrowSoft" d="M 1872 1180 L 1872 1250 L 1048 1250 L 1048 1068 L 1020 1068"/>
+  <text class="label" x="1990" y="1198">写plan/pathQueue</text>
+
+  <!-- Snapshot back to UI -->
+  <path class="arrowSoft" d="M 700 1032 C 650 1080 640 1130 640 1176"/>
+  <line class="arrow" x1="390" y1="1176" x2="325" y2="1176"/>
+  <text class="label" x="360" y="1160">快照</text>
+</svg>

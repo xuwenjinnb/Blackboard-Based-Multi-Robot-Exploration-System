@@ -1,5 +1,4 @@
 param(
-    [string]$NavigatorIds = "",
     [string]$ComponentId = "",
     [double]$WorkerIntervalSeconds = 0.3,
     [int]$BatchesPerTick = 2,
@@ -32,14 +31,13 @@ $env:REDIS_PREFIX = $RedisPrefix
 $env:WORKER_INTERVAL_SECONDS = [string]$WorkerIntervalSeconds
 $env:NAVIGATOR_BATCHES_PER_TICK = [string]$BatchesPerTick
 
-if (-not [string]::IsNullOrWhiteSpace($NavigatorIds)) {
-    $env:NAVIGATOR_IDS = $NavigatorIds
-    Remove-Item Env:COMPONENT_ID -ErrorAction SilentlyContinue
-} elseif (-not [string]::IsNullOrWhiteSpace($ComponentId)) {
+if (-not [string]::IsNullOrWhiteSpace($ComponentId)) {
     $env:COMPONENT_ID = $ComponentId
+    Remove-Item Env:NAVIGATOR_ID -ErrorAction SilentlyContinue
     Remove-Item Env:NAVIGATOR_IDS -ErrorAction SilentlyContinue
 } else {
     Remove-Item Env:COMPONENT_ID -ErrorAction SilentlyContinue
+    Remove-Item Env:NAVIGATOR_ID -ErrorAction SilentlyContinue
     Remove-Item Env:NAVIGATOR_IDS -ErrorAction SilentlyContinue
 }
 

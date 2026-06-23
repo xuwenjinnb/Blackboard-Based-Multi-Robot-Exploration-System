@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="850" viewBox="0 0 1260 850">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#222"/>
+    </marker>
+    <style>
+      .entity{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .process{fill:#9ed3dc;stroke:#111;stroke-width:1.8}
+      .flow{fill:none;stroke:#222;stroke-width:2;marker-end:url(#arrow)}
+      .storeLine{stroke:#222;stroke-width:1.7}
+      .title{font:700 26px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .txt{font:18px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+      .label{font:15px "Microsoft YaHei","PingFang SC",Arial,sans-serif;fill:#111}
+    </style>
+  </defs>
+  <rect width="1260" height="850" fill="#fff"/>
+  <text x="45" y="50" class="title">4.回放分析子系统二层数据流图</text>
+
+  <rect x="70" y="110" width="110" height="165" class="entity"/>
+  <text x="125" y="181" text-anchor="middle" class="txt"><tspan x="125" dy="0">配置</tspan><tspan x="125" dy="28">员</tspan></text>
+
+  <rect x="70" y="590" width="110" height="165" class="entity"/>
+  <text x="125" y="661" text-anchor="middle" class="txt"><tspan x="125" dy="0">分析</tspan><tspan x="125" dy="28">员</tspan></text>
+
+  <circle cx="385" cy="165" r="76" class="process"/>
+  <text x="385" y="153" text-anchor="middle" class="txt"><tspan x="385" dy="0">4.1</tspan><tspan x="385" dy="28">记录运行帧</tspan></text>
+
+  <circle cx="690" cy="165" r="76" class="process"/>
+  <text x="690" y="153" text-anchor="middle" class="txt"><tspan x="690" dy="0">4.2</tspan><tspan x="690" dy="28">保存回放</tspan></text>
+
+  <circle cx="385" cy="590" r="76" class="process"/>
+  <text x="385" y="578" text-anchor="middle" class="txt"><tspan x="385" dy="0">4.3</tspan><tspan x="385" dy="28">查询列表</tspan></text>
+
+  <circle cx="690" cy="590" r="76" class="process"/>
+  <text x="690" y="578" text-anchor="middle" class="txt"><tspan x="690" dy="0">4.4</tspan><tspan x="690" dy="28">加载回放</tspan></text>
+
+  <circle cx="690" cy="745" r="68" class="process"/>
+  <text x="690" y="734" text-anchor="middle" class="txt"><tspan x="690" dy="0">4.5</tspan><tspan x="690" dy="27">播放分析</tspan></text>
+
+  <g>
+    <line x1="840" y1="135" x2="1100" y2="135" class="storeLine"/>
+    <line x1="840" y1="185" x2="1100" y2="185" class="storeLine"/>
+    <text x="970" y="167" text-anchor="middle" class="txt">日志记录表</text>
+  </g>
+  <g>
+    <line x1="840" y1="515" x2="1100" y2="515" class="storeLine"/>
+    <line x1="840" y1="565" x2="1100" y2="565" class="storeLine"/>
+    <text x="970" y="547" text-anchor="middle" class="txt">回放记录表</text>
+  </g>
+
+  <path d="M180 165 L309 165" class="flow"/>
+  <text x="210" y="148" class="label">运行状态快照</text>
+  <path d="M461 165 L614 165" class="flow"/>
+  <text x="500" y="145" class="label">压缩帧</text>
+  <path d="M766 165 L840 160" class="flow"/>
+  <text x="780" y="140" class="label">写日志</text>
+  <path d="M725 228 C805 330 900 430 970 515" class="flow"/>
+  <text x="822" y="380" class="label">回放索引 / 帧</text>
+
+  <path d="M180 640 L315 602" class="flow"/>
+  <text x="210" y="612" class="label">查询请求</text>
+  <path d="M461 590 C585 555 720 540 840 540" class="flow"/>
+  <text x="565" y="560" class="label">读取列表</text>
+  <path d="M840 565 C690 645 530 660 455 620" class="flow"/>
+  <text x="525" y="675" class="label">回放列表</text>
+
+  <path d="M180 690 C320 730 520 665 626 625" class="flow"/>
+  <text x="320" y="730" class="label">选择记录</text>
+  <path d="M766 590 L840 540" class="flow"/>
+  <text x="780" y="610" class="label">读取帧</text>
+  <path d="M690 666 L690 677" class="flow"/>
+  <path d="M624 755 C430 790 250 735 180 690" class="flow"/>
+  <text x="360" y="798" class="label">播放画面 / 统计指标</text>
+</svg>
