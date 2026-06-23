@@ -22,6 +22,12 @@ coverage/
 .edge-path-cache/
 .edge-path-check/
 
+# Keep this frontend package checked in as requested.
+!frontend/Pathfinding-Visualizer-ThreeJS-master/dist/
+!frontend/Pathfinding-Visualizer-ThreeJS-master/dist/**
+!frontend/Pathfinding-Visualizer-ThreeJS-master/node_modules/
+!frontend/Pathfinding-Visualizer-ThreeJS-master/node_modules/**
+
 # Local environment files
 .env
 .env.*

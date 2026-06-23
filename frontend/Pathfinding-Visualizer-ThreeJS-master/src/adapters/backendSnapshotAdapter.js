@@ -100,6 +100,17 @@ function adaptStep(step, vehicleId, planId) {
 	};
 }
 
+function isInBounds(item, width, height) {
+	return (
+		Number.isFinite(item.row) &&
+		Number.isFinite(item.col) &&
+		item.row >= 0 &&
+		item.row < height &&
+		item.col >= 0 &&
+		item.col < width
+	);
+}
+
 function remainingPathForTask(task, vehicle) {
 	const path = task.pathQueue || [];
 	if (!path.length || !vehicle) return [];
@@ -138,17 +149,21 @@ export function adaptSnapshot(snapshot, previousGrid = null) {
 		applyCellToGrid(grid, cell, changedCells);
 	}
 
-	const vehicles = (snapshot.vehicles || []).map(adaptVehicle);
+	const vehicles = (snapshot.vehicles || [])
+		.map(adaptVehicle)
+		.filter((vehicle) => isInBounds(vehicle, width, height));
 	const vehiclesById = Object.fromEntries(vehicles.map((vehicle) => [vehicle.id, vehicle]));
 
 	const frontiers = (snapshot.frontiers || [])
 		.map(adaptFrontier)
+		.filter((frontier) => isInBounds(frontier, width, height))
 		.filter((frontier) => ["OPEN", "ASSIGNED"].includes(frontier.status));
 
 	const pathsByVehicle = {};
 	for (const task of snapshot.tasks || []) {
 		if (!["PLANNED", "RUNNING"].includes(task.status) || !task.planId) continue;
-		const path = remainingPathForTask(task, vehiclesById[task.vehicleId]);
+		const path = remainingPathForTask(task, vehiclesById[task.vehicleId])
+			.filter((step) => isInBounds(step, width, height));
 		if (path.length >= 2) {
 			pathsByVehicle[task.vehicleId] = path;
 		}
