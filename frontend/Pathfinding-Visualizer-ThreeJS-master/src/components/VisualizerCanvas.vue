@@ -33,6 +33,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import TWEEN from "@tweenjs/tween.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 
+import { API_BASE_URL } from "@/config/backend";
 import { tweenToColor } from "./algorithms/helpers.js";
 
 export default {
@@ -718,7 +719,7 @@ export default {
 			const loader = new GLTFLoader();
 			const loadToken = ++this.vehicleModelLoadToken;
 			const modelUrl =
-				`/static/assets/kenney-car-kit/Models/GLB%20format/${encodeURIComponent(modelName)}.glb`;
+				`${API_BASE_URL}/static/assets/kenney-car-kit/Models/GLB%20format/${encodeURIComponent(modelName)}.glb`;
 
 			loader.load(
 				modelUrl,
