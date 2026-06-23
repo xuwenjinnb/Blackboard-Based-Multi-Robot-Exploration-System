@@ -1,7 +1,7 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from .algorithms.factory import create_frontier_scan_algorithm, create_low_level_mdp_algorithm
-from ..blackboard import Blackboard, now_ms
+from ..redis import Blackboard, now_ms
 from ..config import SimulationConfig
 from ..pathfinding import heading_between
 

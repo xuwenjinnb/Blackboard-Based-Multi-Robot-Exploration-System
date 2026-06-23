@@ -1,9 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Any
 
 from .frontier_scan import FrontierScanAlgorithm, neighbors4, neighbors4_with_wait, point_tuple
-from ...blackboard import Blackboard, now_ms
+from ...redis import Blackboard, now_ms
 from ...config import SimulationConfig
 from ...pathfinding import heading_between
 from ...controller.policies.helpers import unknown_cells_visible_from

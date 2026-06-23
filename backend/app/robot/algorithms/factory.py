@@ -1,8 +1,8 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from .frontier_scan import FrontierScanAlgorithm
 from .low_mdp import LowLevelMDPAlgorithm
-from ...blackboard import Blackboard
+from ...redis import Blackboard
 from ...config import SimulationConfig
 
 

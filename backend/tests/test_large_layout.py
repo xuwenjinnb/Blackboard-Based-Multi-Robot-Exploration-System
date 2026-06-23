@@ -1,4 +1,4 @@
-from app.blackboard import Blackboard
+﻿from app.redis import Blackboard
 from app.config import SimulationConfig
 from app.controller.policies import create_assignment_policy
 from app.navigator.planners.astar_planner import astar

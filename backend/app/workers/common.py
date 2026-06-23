@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 import socket
@@ -6,7 +6,7 @@ import time
 from dataclasses import replace
 from typing import Any
 
-from ..blackboard import now_ms
+from ..redis import now_ms
 from ..config import SimulationConfig, simulation_config_from_env
 from ..controller.policies import AssignmentPolicy, create_assignment_policy
 from ..redis import (

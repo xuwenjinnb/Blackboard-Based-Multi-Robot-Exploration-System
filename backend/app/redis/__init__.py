@@ -1,4 +1,5 @@
 from .auth_store import AuthStore, ROLE_ADMIN, ROLE_ANALYST, ROLE_OPERATOR
+from .base import Blackboard, now_ms
 from .blackboard import RedisBlackboard
 from .client import (
     RedisClientFactory,
@@ -11,6 +12,7 @@ from .replay_store import ReplayStore, coverage
 
 __all__ = [
     "AuthStore",
+    "Blackboard",
     "RedisBlackboard",
     "RedisClientFactory",
     "RedisConfig",
@@ -22,5 +24,6 @@ __all__ = [
     "coverage",
     "create_redis_client",
     "log_transient_redis_error",
+    "now_ms",
     "redis_config_from_env",
 ]

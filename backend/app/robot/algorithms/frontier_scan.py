@@ -1,8 +1,8 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Any
 
-from ...blackboard import Blackboard, now_ms
+from ...redis import Blackboard, now_ms
 from ...config import SimulationConfig
 from ...pathfinding import manhattan
 from ...controller.policies.helpers import unknown_cells_visible_from

@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from .blackboard import now_ms
+from .redis import now_ms
 from .config import simulation_config_from_env
 from .controller.policies import create_assignment_policy
 from .redis import (

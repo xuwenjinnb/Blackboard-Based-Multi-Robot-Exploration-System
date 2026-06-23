@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import threading
@@ -7,7 +7,7 @@ from typing import Any, Callable, TypeVar
 
 import redis
 
-from ..blackboard import Blackboard, now_ms
+from .base import Blackboard, now_ms
 from .client import create_redis_client
 from .config import RedisConfig
 

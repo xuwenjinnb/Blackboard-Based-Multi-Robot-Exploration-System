@@ -1,8 +1,8 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Any
 
-from ..blackboard import Blackboard
+from ..redis import Blackboard
 from .policies import AssignmentPolicy
 
 

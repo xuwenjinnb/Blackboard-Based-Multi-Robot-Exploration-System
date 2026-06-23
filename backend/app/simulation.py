@@ -1,11 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import random
 from dataclasses import replace
 from typing import Any
 
-from .blackboard import Blackboard
+from .redis import Blackboard
 from .config import SimulationConfig
 from .controller import ControllerComponent
 from .navigator import NavigatorComponent

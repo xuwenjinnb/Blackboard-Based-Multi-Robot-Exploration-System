@@ -1,11 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Any
 
 from .planners.cbs_planner import CBSPlanner
 from .planners.factory import create_planner
 from .planners.st_astar_planner import StAStarPlanner
-from ..blackboard import Blackboard, now_ms
+from ..redis import Blackboard, now_ms
 from ..config import SimulationConfig
 
 
