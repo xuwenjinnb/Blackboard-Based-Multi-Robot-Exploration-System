@@ -6,6 +6,7 @@ from ...redis import Blackboard, now_ms
 from ...config import SimulationConfig
 from ...pathfinding import manhattan
 from ...controller.policies.helpers import unknown_cells_visible_from
+from ...visibility import visible_points_in_square
 
 
 MAX_FRONTIERS_PER_SCAN = 16
@@ -38,26 +39,36 @@ class FrontierScanAlgorithm:
         if not vehicle:
             return
         center = vehicle["pose"]["position"]
+        center_point = point_tuple(center)
+        timestamp = now_ms()
         cells = []
-        for y in range(center["y"] - self.scan_radius, center["y"] + self.scan_radius + 1):
-            for x in range(center["x"] - self.scan_radius, center["x"] + self.scan_radius + 1):
-                if not (0 <= x < self.blackboard.width and 0 <= y < self.blackboard.height):
-                    continue
-                if self.blackboard.is_truth_blocked({"x": x, "y": y}):
-                    state = "OBSTACLE"
-                elif x == center["x"] and y == center["y"]:
-                    state = "VISITED"
-                else:
-                    state = "FREE"
-                cells.append(
-                    {
-                        "x": x,
-                        "y": y,
-                        "state": state,
-                        "confidence": 1.0,
-                        "updatedAt": now_ms(),
-                    }
-                )
+        is_blocked = lambda point: self.blackboard.is_truth_blocked(
+            {"x": point[0], "y": point[1]}
+        )
+        for x, y in visible_points_in_square(
+            center_point,
+            self.scan_radius,
+            in_bounds=lambda point: (
+                0 <= point[0] < self.blackboard.width
+                and 0 <= point[1] < self.blackboard.height
+            ),
+            is_blocked=is_blocked,
+        ):
+            if is_blocked((x, y)):
+                state = "OBSTACLE"
+            elif (x, y) == center_point:
+                state = "VISITED"
+            else:
+                state = "FREE"
+            cells.append(
+                {
+                    "x": x,
+                    "y": y,
+                    "state": state,
+                    "confidence": 1.0,
+                    "updatedAt": timestamp,
+                }
+            )
         self.blackboard.upload_map_patch(
             {
                 "patchId": self.blackboard.next_id("patch"),

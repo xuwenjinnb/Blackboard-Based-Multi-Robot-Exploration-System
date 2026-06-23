@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from ...visibility import visible_points_in_square
+
 
 def unknown_cells_visible_from(
     position: dict[str, int],
@@ -9,13 +11,19 @@ def unknown_cells_visible_from(
     scan_radius: int,
 ) -> int:
     """输入 frontier 坐标和地图格子，输出扫描半径内可见 UNKNOWN 格子数量。"""
-    gain = 0
-    for y in range(position["y"] - scan_radius, position["y"] + scan_radius + 1):
-        for x in range(position["x"] - scan_radius, position["x"] + scan_radius + 1):
-            cell = cell_map.get((x, y))
-            if cell and cell.get("state") == "UNKNOWN":
-                gain += 1
-    return gain
+    origin = point_tuple(position)
+    return sum(
+        1
+        for point in visible_points_in_square(
+            origin,
+            scan_radius,
+            in_bounds=lambda candidate: candidate in cell_map,
+            is_blocked=lambda candidate: (
+                cell_map.get(candidate, {}).get("state") == "OBSTACLE"
+            ),
+        )
+        if cell_map.get(point, {}).get("state") == "UNKNOWN"
+    )
 
 
 def point_tuple(point: dict[str, int]) -> tuple[int, int]:

@@ -23,6 +23,7 @@ class ControllerComponent:
 
     def run_once(self) -> None:
         self.blackboard.update_heartbeat(self.component_id, "CONTROLLER", "BUSY", "assignment")
+        self.blackboard.refresh_frontiers_locked(self.scan_radius)
 
         for task in self.blackboard.pending_tasks_without_request():
             try:

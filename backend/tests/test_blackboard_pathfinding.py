@@ -20,6 +20,8 @@ from app.controller.policies import (
     create_assignment_policy,
 )
 from app.simulation import SimulationEngine
+from app.controller.policies.helpers import unknown_cells_visible_from
+from app.visibility import has_line_of_sight
 
 
 def test_blackboard_initializes_map_and_snapshot():
@@ -224,6 +226,69 @@ def test_vehicle_redeployment_clears_previous_visible_area():
     assert all(cell_map[point]["state"] == "UNKNOWN" for point in stale_visible)
 
 
+def test_vehicle_scan_does_not_reveal_cells_behind_obstacle():
+    board = Blackboard(width=7, height=5)
+    simulation = SimulationEngine(board, config=SimulationConfig(scan_radius=3))
+    board.true_obstacles = {(3, 2)}
+    board.reset_perception_map_locked()
+    board.register_vehicle("car-test", {"position": {"x": 1, "y": 2}, "heading": 0})
+
+    simulation.scan_and_upload("car-test", detect_frontiers=False)
+
+    cell_map = {
+        (cell["x"], cell["y"]): cell["state"]
+        for cell in board.snapshot()["map"]["cells"]
+    }
+    assert cell_map[(3, 2)] == "OBSTACLE"
+    assert cell_map[(4, 2)] == "UNKNOWN"
+    assert cell_map[(2, 1)] == "FREE"
+
+
+def test_unknown_gain_excludes_cells_hidden_behind_obstacle():
+    cell_map = {
+        (x, y): {"x": x, "y": y, "state": "FREE"}
+        for y in range(3)
+        for x in range(5)
+    }
+    cell_map[(2, 1)]["state"] = "OBSTACLE"
+    cell_map[(3, 1)]["state"] = "UNKNOWN"
+    cell_map[(1, 2)]["state"] = "UNKNOWN"
+
+    gain = unknown_cells_visible_from({"x": 1, "y": 1}, cell_map, scan_radius=3)
+
+    assert gain == 1
+
+
+def test_line_of_sight_cannot_leak_around_single_blocked_corner():
+    obstacle = (2, 1)
+
+    visible = has_line_of_sight(
+        (1, 1),
+        (3, 3),
+        lambda point: point == obstacle,
+    )
+
+    assert visible is False
+
+
+def test_vehicle_scan_does_not_reveal_diagonal_cells_around_wall_corner():
+    board = Blackboard(width=6, height=6)
+    simulation = SimulationEngine(board, config=SimulationConfig(scan_radius=3))
+    board.true_obstacles = {(2, 1)}
+    board.reset_perception_map_locked()
+    board.register_vehicle("car-test", {"position": {"x": 1, "y": 1}, "heading": 0})
+
+    simulation.scan_and_upload("car-test", detect_frontiers=False)
+
+    cell_map = {
+        (cell["x"], cell["y"]): cell["state"]
+        for cell in board.snapshot()["map"]["cells"]
+    }
+    assert cell_map[(2, 1)] == "OBSTACLE"
+    assert cell_map[(3, 3)] == "UNKNOWN"
+    assert cell_map[(1, 3)] == "FREE"
+
+
 @pytest.mark.parametrize("system_status", ["PAUSED", "STOPPED"])
 def test_vehicle_reduction_removes_largest_ids_without_resetting_map(system_status):
     board = Blackboard()
@@ -414,6 +479,108 @@ def test_frontier_is_saved_and_deduplicated():
     assert second["unknownGain"] == 7
     assert "score" not in second
     assert len(board.snapshot()["frontiers"]) == 1
+
+
+def test_frontier_hidden_behind_wall_corner_is_closed():
+    board = Blackboard(width=5, height=4)
+    for cell in board.map["cells"]:
+        cell["state"] = "FREE"
+        cell["confidence"] = 1.0
+    board.cell_at(2, 1)["state"] = "OBSTACLE"
+    board.cell_at(2, 2)["state"] = "UNKNOWN"
+    frontier = board.save_frontier(
+        {
+            "position": {"x": 1, "y": 1},
+            "unknownGain": 1,
+            "discoveredBy": "car-test",
+        }
+    )
+
+    closed = board.refresh_frontiers_locked(scan_radius=2)
+
+    assert closed == 1
+    assert board.frontiers[frontier["frontierId"]]["status"] == "CLOSED"
+    assert board.frontiers[frontier["frontierId"]]["unknownGain"] == 0
+    assert board.open_frontiers() == []
+
+
+def test_controller_removes_frontiers_without_visible_unknown_gain():
+    board = Blackboard(width=5, height=4)
+    for cell in board.map["cells"]:
+        cell["state"] = "FREE"
+        cell["confidence"] = 1.0
+    board.cell_at(2, 1)["state"] = "OBSTACLE"
+    board.cell_at(2, 2)["state"] = "UNKNOWN"
+    board.register_vehicle("car-test", {"position": {"x": 1, "y": 1}, "heading": 0})
+    frontier = board.save_frontier(
+        {
+            "position": {"x": 1, "y": 1},
+            "unknownGain": 1,
+            "discoveredBy": "car-test",
+        }
+    )
+    simulation = SimulationEngine(board)
+
+    simulation.controller_phase()
+
+    assert board.frontiers[frontier["frontierId"]]["status"] == "CLOSED"
+    assert board.snapshot()["tasks"] == []
+
+
+def test_closing_assigned_frontier_cancels_task_and_releases_vehicle():
+    board = Blackboard(width=5, height=4)
+    for cell in board.map["cells"]:
+        cell["state"] = "FREE"
+        cell["confidence"] = 1.0
+    board.cell_at(2, 1)["state"] = "OBSTACLE"
+    board.cell_at(2, 2)["state"] = "UNKNOWN"
+    board.register_vehicle("car-test", {"position": {"x": 1, "y": 1}, "heading": 0})
+    frontier = board.save_frontier(
+        {
+            "position": {"x": 1, "y": 1},
+            "unknownGain": 1,
+            "discoveredBy": "car-test",
+        }
+    )
+    task = board.create_task_for_frontier("car-test", frontier)
+
+    board.refresh_frontiers_locked(scan_radius=2)
+
+    assert board.frontiers[frontier["frontierId"]]["status"] == "CLOSED"
+    assert board.tasks[task["taskId"]]["status"] == "CANCELLED"
+    assert board.vehicles["car-test"]["currentTaskId"] is None
+    assert board.vehicles["car-test"]["status"] == "IDLE"
+
+
+def test_failed_plan_closes_frontier_and_releases_vehicle():
+    board = Blackboard(width=5, height=4)
+    board.register_vehicle("car-test", {"position": {"x": 1, "y": 1}, "heading": 0})
+    frontier = board.save_frontier(
+        {
+            "position": {"x": 3, "y": 1},
+            "unknownGain": 1,
+            "discoveredBy": "car-test",
+        }
+    )
+    task = board.create_task_for_frontier("car-test", frontier)
+    request = board.create_navigation_request(task)
+
+    board.write_navigation_plan(
+        {
+            "requestId": request["requestId"],
+            "taskId": task["taskId"],
+            "vehicleId": "car-test",
+            "status": "NO_PATH",
+            "path": [],
+            "failReason": "no path found",
+            "createdBy": "navigator-test",
+        }
+    )
+
+    assert board.tasks[task["taskId"]]["status"] == "FAILED"
+    assert board.frontiers[frontier["frontierId"]]["status"] == "CLOSED"
+    assert board.vehicles["car-test"]["currentTaskId"] is None
+    assert board.open_frontiers() == []
 
 
 def test_frontier_outside_map_is_rejected():

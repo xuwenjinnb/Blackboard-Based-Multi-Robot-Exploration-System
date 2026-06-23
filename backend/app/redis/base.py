@@ -7,6 +7,8 @@ import time
 from contextlib import contextmanager
 from typing import Any
 
+from ..visibility import visible_points_in_square
+
 MAX_MAP_DIMENSION = 512
 MAX_CHUNK_SIZE = 128
 MAP_DELTA_HISTORY_LIMIT = 120
@@ -1008,18 +1010,22 @@ class Blackboard:
             position = frontier.get("position", {})
             point = (int(position.get("x", 0)), int(position.get("y", 0)))
             if not self._point_in_bounds(point):
-                frontier["status"] = "CLOSED"
-                frontier["unknownGain"] = 0
-                frontier["updatedAt"] = now_ms()
+                self._deactivate_frontier_locked(frontier, "CLOSED")
                 closed += 1
                 continue
             cell_state = cell_map.get(point, {}).get("state", "UNKNOWN")
             has_unknown_neighbor = self._has_unknown_neighbor(point, cell_map)
-            if cell_state not in {"FREE", "VISITED"} or not has_unknown_neighbor:
-                frontier["status"] = "VISITED" if cell_state == "VISITED" else "CLOSED"
-                frontier["unknownGain"] = 0
-                frontier["updatedAt"] = now_ms()
+            unknown_gain = self._visible_unknown_gain(point, cell_map, scan_radius)
+            if (
+                cell_state not in {"FREE", "VISITED"}
+                or not has_unknown_neighbor
+                or unknown_gain <= 0
+            ):
+                next_status = "VISITED" if cell_state == "VISITED" else "CLOSED"
+                self._deactivate_frontier_locked(frontier, next_status)
                 closed += 1
+                continue
+            frontier["unknownGain"] = unknown_gain
         if closed:
             self.prune_runtime_history_locked()
         return closed
@@ -1036,6 +1042,56 @@ class Blackboard:
             for y in range(py - 1, py + 2)
             if (x, y) != (px, py)
         )
+
+    def _visible_unknown_gain(
+        self,
+        position: tuple[int, int],
+        cell_map: dict[tuple[int, int], dict[str, Any]],
+        scan_radius: int,
+    ) -> int:
+        return sum(
+            1
+            for point in visible_points_in_square(
+                position,
+                scan_radius,
+                in_bounds=lambda candidate: candidate in cell_map,
+                is_blocked=lambda candidate: (
+                    cell_map.get(candidate, {}).get("state") == "OBSTACLE"
+                ),
+            )
+            if cell_map.get(point, {}).get("state") == "UNKNOWN"
+        )
+
+    def _deactivate_frontier_locked(
+        self,
+        frontier: dict[str, Any],
+        status: str,
+    ) -> None:
+        frontier["status"] = status
+        frontier["unknownGain"] = 0
+        frontier["updatedAt"] = now_ms()
+        frontier_id = frontier.get("frontierId")
+        for task in self.tasks.values():
+            if (
+                task.get("frontierId") != frontier_id
+                or task.get("status") != "PENDING"
+            ):
+                continue
+            task["status"] = "CANCELLED"
+            task["updatedAt"] = now_ms()
+            vehicle = self.vehicles.get(task.get("vehicleId"))
+            if vehicle and vehicle.get("currentTaskId") == task.get("taskId"):
+                vehicle["status"] = "IDLE"
+                vehicle["currentTaskId"] = None
+                vehicle["currentPlanId"] = None
+                vehicle["currentStepIndex"] = 0
+            for request in self.navigation_requests.values():
+                if (
+                    request.get("taskId") == task.get("taskId")
+                    and request.get("status") in {"PENDING", "PLANNING"}
+                ):
+                    request["status"] = "CANCELLED"
+                    request["updatedAt"] = now_ms()
 
     def create_task_for_frontier(self, vehicle_id: str, frontier: dict[str, Any]) -> dict[str, Any]:
         with self.lock:
@@ -1152,6 +1208,12 @@ class Blackboard:
 
             request = self.navigation_requests.get(plan["requestId"])
             task = self.tasks.get(plan["taskId"])
+            if task and task.get("status") == "CANCELLED":
+                if request:
+                    request["status"] = "CANCELLED"
+                    request["updatedAt"] = now_ms()
+                self.update_heartbeat(plan.get("createdBy", "navigator"), "NAVIGATOR", "READY", None)
+                return copy.deepcopy(plan)
             if request:
                 request["status"] = "SUCCESS" if plan["status"] == "SUCCESS" else "FAILED"
                 request["updatedAt"] = now_ms()
@@ -1164,6 +1226,15 @@ class Blackboard:
                     self.add_event(plan["createdBy"], "PLAN_SUCCESS", f"{plan_id} created for {task['taskId']}")
                 else:
                     task["status"] = "FAILED"
+                    frontier = self.frontiers.get(task.get("frontierId"))
+                    if frontier:
+                        self._deactivate_frontier_locked(frontier, "CLOSED")
+                    vehicle = self.vehicles.get(task.get("vehicleId"))
+                    if vehicle and vehicle.get("currentTaskId") == task.get("taskId"):
+                        vehicle["status"] = "IDLE"
+                        vehicle["currentTaskId"] = None
+                        vehicle["currentPlanId"] = None
+                        vehicle["currentStepIndex"] = 0
                     self.add_event(plan["createdBy"], "PLAN_FAILED", plan.get("failReason", "planning failed"))
                 task["updatedAt"] = now_ms()
             self.prune_runtime_history_locked()
