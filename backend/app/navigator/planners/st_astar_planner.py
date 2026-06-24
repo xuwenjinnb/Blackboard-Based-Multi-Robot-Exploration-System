@@ -176,8 +176,11 @@ class StAStarPlanner:
         edge_reservations: set[tuple[tuple[int, int], tuple[int, int], int]] = set()
 
         active_task_ids: set[str] = set()
+        excluded_vehicle_ids: set[str] = set()
         for task in snapshot["tasks"]:
             if task["taskId"] == exclude_task_id:
+                if task.get("vehicleId"):
+                    excluded_vehicle_ids.add(str(task["vehicleId"]))
                 continue
             if task.get("status") in {"DONE", "FAILED", "CANCELLED"}:
                 continue
@@ -200,9 +203,15 @@ class StAStarPlanner:
                     reservations.setdefault(offset, set()).add(previous)
 
         for vehicle in snapshot["vehicles"]:
+            if str(vehicle.get("vehicleId", "")) in excluded_vehicle_ids:
+                continue
             if vehicle.get("currentTaskId") in active_task_ids:
                 continue
-            position = vehicle["pose"]["position"]
-            reservations.setdefault(0, set()).add((int(position["x"]), int(position["y"])))
+            position = vehicle.get("pose", {}).get("position")
+            if not isinstance(position, dict):
+                continue
+            cell = (int(position["x"]), int(position["y"]))
+            for offset in range(0, horizon + 1):
+                reservations.setdefault(offset, set()).add(cell)
 
         return reservations, edge_reservations

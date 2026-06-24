@@ -50,6 +50,8 @@ function applyCellToGrid(grid, cell, changedCells = null) {
 
 	const node = grid[row][col];
 	const previousStatus = node.status;
+	node.vehicleReserved = false;
+	node.reservedByVehicle = null;
 	node.backendState = cell.state;
 	node.status = mapCellStateToNodeStatus(cell.state);
 	node.confidence = cell.confidence;
@@ -57,6 +59,40 @@ function applyCellToGrid(grid, cell, changedCells = null) {
 	node.updatedAt = cell.updatedAt;
 	if (changedCells && previousStatus !== node.status) {
 		changedCells.push({ row, col });
+	}
+}
+
+function clearVehicleReservations(grid, changedCells = null) {
+	for (const row of grid) {
+		for (const node of row) {
+			if (!node.vehicleReserved) continue;
+			const previousStatus = node.status;
+			node.vehicleReserved = false;
+			node.reservedByVehicle = null;
+			node.status = mapCellStateToNodeStatus(node.backendState);
+			if (changedCells && previousStatus !== node.status) {
+				changedCells.push({ row: node.row, col: node.col });
+			}
+		}
+	}
+}
+
+function applyVehicleReservations(grid, vehicles, changedCells = null) {
+	for (const vehicle of vehicles) {
+		const row = Number(vehicle.row);
+		const col = Number(vehicle.col);
+		if (!grid[row] || !grid[row][col]) continue;
+
+		const node = grid[row][col];
+		if (node.backendState === "OBSTACLE") continue;
+
+		const previousStatus = node.status;
+		node.vehicleReserved = true;
+		node.reservedByVehicle = vehicle.id;
+		node.status = "reserved";
+		if (changedCells && previousStatus !== node.status) {
+			changedCells.push({ row, col });
+		}
 	}
 }
 
@@ -153,6 +189,8 @@ export function adaptSnapshot(snapshot, previousGrid = null) {
 		.map(adaptVehicle)
 		.filter((vehicle) => isInBounds(vehicle, width, height));
 	const vehiclesById = Object.fromEntries(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+	clearVehicleReservations(grid, changedCells);
+	applyVehicleReservations(grid, vehicles, changedCells);
 
 	const frontiers = (snapshot.frontiers || [])
 		.map(adaptFrontier)

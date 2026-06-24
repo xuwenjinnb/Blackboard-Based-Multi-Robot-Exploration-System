@@ -29,6 +29,7 @@ async def control_start(
     if payload.get("navigatorAlgorithm"):
         configure_navigator_algorithm(str(payload["navigatorAlgorithm"]))
     simulation.ensure_demo_vehicles()
+    blackboard.reset_perception_map_locked(reveal_obstacles=False)
     result = blackboard.set_system_status("RUNNING")
     snapshot = snapshot_with_runtime()
     replay_store.start(request.state.user["username"], runtime_state(), snapshot)

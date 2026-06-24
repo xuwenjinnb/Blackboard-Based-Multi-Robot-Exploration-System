@@ -101,7 +101,6 @@ class SimulationEngine:
                 vehicle_id = item["vehicleId"]
                 pose = {"position": {"x": item["x"], "y": item["y"]}, "heading": item["heading"]}
                 self.blackboard.register_vehicle(vehicle_id, pose)
-                self.scan_and_upload(vehicle_id)
             for navigator_id in self.navigator_ids:
                 self.blackboard.update_heartbeat(navigator_id, "NAVIGATOR", "READY", None)
             self.blackboard.update_heartbeat("controller-01", "CONTROLLER", "READY", None)

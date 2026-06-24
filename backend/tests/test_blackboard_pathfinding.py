@@ -13,7 +13,7 @@ from app.config import SimulationConfig
 from app.navigator import NavigatorComponent
 from app.navigator.planners.astar_planner import astar
 from app.navigator.planners.cbs_planner import CBSPlanner
-from app.navigator.planners.st_astar_planner import st_astar
+from app.navigator.planners.st_astar_planner import StAStarPlanner, st_astar
 from app.controller.policies import (
     AssignmentDecision,
     NearestReachableFrontierPolicy,
@@ -164,6 +164,34 @@ def test_batch_obstacle_brush_updates_cells_once():
     assert cell_map[(2, 1)] == "OBSTACLE"
 
 
+def test_start_can_hide_configured_obstacles_until_scan_reveals_them():
+    board = Blackboard(width=8, height=6)
+    simulation = SimulationEngine(board, config=SimulationConfig(scan_radius=2))
+    board.set_obstacles_at([{"x": 3, "y": 2, "blocked": True}])
+
+    configured = {
+        (cell["x"], cell["y"]): cell["state"]
+        for cell in board.snapshot()["map"]["cells"]
+    }
+    assert configured[(3, 2)] == "OBSTACLE"
+
+    board.reset_perception_map_locked(reveal_obstacles=False)
+    hidden = {
+        (cell["x"], cell["y"]): cell["state"]
+        for cell in board.snapshot()["map"]["cells"]
+    }
+    assert hidden[(3, 2)] == "UNKNOWN"
+    assert (3, 2) in board.true_obstacles
+
+    board.register_vehicle("car-test", {"position": {"x": 2, "y": 2}, "heading": 0})
+    simulation.scan_and_upload("car-test", detect_frontiers=False)
+    revealed = {
+        (cell["x"], cell["y"]): cell["state"]
+        for cell in board.snapshot()["map"]["cells"]
+    }
+    assert revealed[(3, 2)] == "OBSTACLE"
+
+
 def test_vehicle_redeployment_clears_previous_visible_area():
     board = Blackboard()
     simulation = SimulationEngine(board)
@@ -185,6 +213,7 @@ def test_vehicle_redeployment_clears_previous_visible_area():
             ],
         }
         simulation._reset_runtime_for_vehicle_deployment_locked()
+        simulation.scan_and_upload("car-01", detect_frontiers=False)
 
     old_visible = {
         (cell["x"], cell["y"])
@@ -648,6 +677,32 @@ def test_astar_returns_path_around_obstacle():
     assert all(step["position"] != {"x": 3, "y": 1} for step in path)
 
 
+def test_astar_planner_reserves_other_static_vehicle_position():
+    board = Blackboard(width=5, height=3)
+    for cell in board.map["cells"]:
+        cell["state"] = "FREE"
+    board.true_obstacles = set()
+    board.register_vehicle("car-01", {"position": {"x": 1, "y": 1}, "heading": 0})
+    board.register_vehicle("car-02", {"position": {"x": 2, "y": 1}, "heading": 0})
+    frontier = board.save_frontier(
+        {"position": {"x": 3, "y": 1}, "unknownGain": 1, "discoveredBy": "test"}
+    )
+    task = board.create_task_for_frontier("car-01", frontier)
+    board.create_navigation_request(task)
+
+    navigator = NavigatorComponent(
+        board,
+        SimulationConfig(use_st_astar=False),
+        ["navigator-test"],
+    )
+    navigator.run_once()
+
+    plans = board.snapshot()["navigationPlans"]
+    assert len(plans) == 1
+    assert plans[0]["status"] == "SUCCESS"
+    assert all(step["position"] != {"x": 2, "y": 1} for step in plans[0]["path"])
+
+
 def test_st_astar_waits_for_reserved_time_slot():
     cells = [
         {"x": x, "y": 0, "state": "FREE", "confidence": 1, "updatedAt": now_ms()}
@@ -686,6 +741,56 @@ def test_st_astar_allows_start_reserved_at_time_zero():
 
     assert reason is None
     assert path[-1]["position"] == {"x": 2, "y": 0}
+
+
+def test_st_astar_reserves_idle_vehicle_position_for_horizon():
+    cells = [
+        {"x": x, "y": 0, "state": "FREE", "confidence": 1, "updatedAt": now_ms()}
+        for x in range(3)
+    ]
+    snapshot = {
+        "map": {"width": 3, "height": 1, "cells": cells},
+        "vehicles": [
+            {
+                "vehicleId": "car-01",
+                "currentTaskId": "task-01",
+                "pose": {"position": {"x": 0, "y": 0}},
+            },
+            {
+                "vehicleId": "car-02",
+                "currentTaskId": None,
+                "pose": {"position": {"x": 1, "y": 0}},
+            },
+        ],
+        "tasks": [
+            {
+                "taskId": "task-01",
+                "vehicleId": "car-01",
+                "status": "PENDING",
+                "pathQueue": [],
+            }
+        ],
+    }
+    request = {
+        "requestId": "request-01",
+        "taskId": "task-01",
+        "vehicleId": "car-01",
+        "start": {"x": 0, "y": 0},
+        "goal": {"x": 2, "y": 0},
+    }
+    planner = StAStarPlanner(SimulationConfig(st_astar_horizon=6))
+
+    reservations, _edges = planner.build_time_reservations(
+        snapshot,
+        exclude_task_id="task-01",
+        horizon=6,
+    )
+    path, reason = planner.plan(snapshot, request)
+
+    assert all((1, 0) in reservations[time_slot] for time_slot in range(7))
+    assert (0, 0) not in reservations.get(1, set())
+    assert path == []
+    assert reason == "no time-safe path found"
 
 
 def test_frontiers_are_boundary_points():
@@ -739,6 +844,8 @@ def test_controller_uses_pluggable_assignment_policy():
     policy = FirstFrontierPolicy()
     simulation = SimulationEngine(board, assignment_policy=policy)
     simulation.ensure_demo_vehicles()
+    for vehicle in board.snapshot()["vehicles"]:
+        simulation.scan_and_upload(vehicle["vehicleId"])
 
     simulation.controller_phase()
 

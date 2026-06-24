@@ -813,8 +813,12 @@ class RedisBlackboard(Blackboard):
     def upload_map_patch(self, patch: dict[str, Any]) -> dict[str, Any]:
         return self._execute(Blackboard.upload_map_patch, patch, write=True)
 
-    def reset_perception_map_locked(self) -> int:
-        return self._execute(Blackboard.reset_perception_map_locked, write=True)
+    def reset_perception_map_locked(self, *, reveal_obstacles: bool = True) -> int:
+        return self._execute(
+            Blackboard.reset_perception_map_locked,
+            reveal_obstacles=reveal_obstacles,
+            write=True,
+        )
 
     def configure_map(self, *, width: int, height: int, chunk_size: int | None = None) -> dict[str, Any]:
         return self._execute(

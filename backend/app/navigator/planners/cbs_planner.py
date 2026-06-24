@@ -230,7 +230,12 @@ class CBSPlanner:
             current_task_id = vehicle.get("currentTaskId")
             if current_task_id in active_task_ids or current_task_id in group_task_ids:
                 continue
-            reservations.setdefault(0, set()).add(point_key(vehicle["pose"]["position"]))
+            position = vehicle.get("pose", {}).get("position")
+            if not isinstance(position, dict):
+                continue
+            cell = point_key(position)
+            for offset in range(0, self.config.st_astar_horizon + 1):
+                reservations.setdefault(offset, set()).add(cell)
 
         return reservations, edge_reservations
 

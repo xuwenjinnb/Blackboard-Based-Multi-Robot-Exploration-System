@@ -56,6 +56,7 @@ async def apply_ws_control(message: dict[str, Any]) -> None:
         if message.get("navigatorAlgorithm"):
             configure_navigator_algorithm(str(message["navigatorAlgorithm"]))
         simulation.ensure_demo_vehicles()
+        blackboard.reset_perception_map_locked(reveal_obstacles=False)
         blackboard.set_system_status("RUNNING")
         replay_store.start("websocket", runtime_state(), snapshot_with_runtime())
     elif action == "pause":

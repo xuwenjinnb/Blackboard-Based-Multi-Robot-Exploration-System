@@ -611,8 +611,9 @@ class Blackboard:
         self.heartbeats = {}
         self.system_status = "STOPPED"
 
-    def reset_perception_map_locked(self) -> int:
-        return self._apply_obstacles_to_map_locked(self.true_obstacles)
+    def reset_perception_map_locked(self, *, reveal_obstacles: bool = True) -> int:
+        obstacles = self.true_obstacles if reveal_obstacles else set()
+        return self._apply_obstacles_to_map_locked(obstacles)
 
     def _apply_obstacles_to_map_locked(self, obstacles: set[tuple[int, int]]) -> int:
         changed = 0

@@ -5,6 +5,7 @@ from typing import Any
 
 from ...config import SimulationConfig
 from ...pathfinding import Point, in_bounds, neighbors4, point_key, reconstruct_path, to_steps
+from .vehicle_occupancy import map_with_vehicle_reservations
 
 
 def astar(map_grid: dict[str, Any], start: Point, goal: Point) -> tuple[list[dict[str, Any]], str | None]:
@@ -75,4 +76,9 @@ class AStarPlanner:
         self.config = config
 
     def plan(self, snapshot: dict[str, Any], request: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
-        return astar(snapshot["map"], request["start"], request["goal"])
+        map_grid = map_with_vehicle_reservations(
+            snapshot["map"],
+            snapshot.get("vehicles", []) if request.get("avoidVehicles", True) else [],
+            exclude_vehicle_id=request.get("vehicleId"),
+        )
+        return astar(map_grid, request["start"], request["goal"])
