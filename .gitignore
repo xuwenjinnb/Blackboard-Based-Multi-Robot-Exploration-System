@@ -22,11 +22,15 @@ coverage/
 .edge-path-cache/
 .edge-path-check/
 
-# Keep this frontend package checked in as requested.
+# Keep this frontend build checked in for direct backend serving.
 !frontend/Pathfinding-Visualizer-ThreeJS-master/dist/
 !frontend/Pathfinding-Visualizer-ThreeJS-master/dist/**
-!frontend/Pathfinding-Visualizer-ThreeJS-master/node_modules/
-!frontend/Pathfinding-Visualizer-ThreeJS-master/node_modules/**
+
+# Large generated/material folders kept locally but not published to GitHub.
+exe文件/
+fig/
+图/
+算法/
 
 # Local environment files
 .env
